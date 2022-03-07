@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .settings/
 
 .mvn/
@@ -5,6 +6,8 @@
 target
 
 
+=======
+>>>>>>> refs/remotes/origin/master
 # ---> Eclipse
 .metadata
 bin/
