@@ -1,169 +1,173 @@
 package com.sarfaraz.management.model;
 
-
+import com.fasterxml.jackson.annotation.*;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "users")
-
 public class User {
 
-	@Id
-	@GeneratedValue(generator = "user_id_sec", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "user_id_sec", sequenceName = "jpa_sequence", allocationSize = 5)
-	@Column(nullable = false, precision = 5)
-	private Long id;
-	@Column(nullable = false)
-	private String name;
-	@Column
-	private String email;
-	@NotBlank(message = "Username Can Not Be Empty")
-	private String username;
-	@NotBlank(message = "Password Can Not Be Empty")
-	private String password;
-	@DateTimeFormat(pattern = "dd-MM-yyyy")
-	private LocalDate dob;
-	private String mobile;
-	private String address;
-	private boolean active;
-	@Column(name = "image_path")
-	private String imagePath;
+    @Id
+    @GeneratedValue(generator = "user_id_sec", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "user_id_sec", sequenceName = "jpa_sequence", allocationSize = 5)
+    @Column(nullable = false, precision = 5)
+    private Long id;
+    @NotBlank
+    private String name;
+    @NotBlank
+    private String email;
+    @NotBlank(message = "Username Can Not Be Empty")
+    private String username;
+    @NotBlank(message = "Password Can Not Be Empty")
+    private String password;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate dob;
+    private String mobile;
+    private String address;
+    private boolean active;
+  
+
+    //@JsonInclude(JsonInclude.Include.NON_EMPTY)
+    //@JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
+    private Set<Role> roles = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Project> project = new HashSet<>();
 
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-	@JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
-	private Set<Role> roles = new HashSet<>();
+    public User(Long id) {
+        this.id = id;
+    }
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private Set<Project> project = new HashSet<>();
+    public User() {
+    }
 
+    public User(String name) {
+        this.name = name;
+    }
 
-	public User(Long id) {
-		this.id = id;
-	}
+  
+    public boolean isActive() {
+        return active;
+    }
 
-	public User() {
-	}
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
-	public User(String name) {
-		this.name = name;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getImagePath() {
-		return imagePath;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setImagePath(String imagePath) {
-		this.imagePath = imagePath;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public boolean isActive() {
-		return active;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setActive(boolean active) {
-		this.active = active;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getAddress() {
+        return address;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public LocalDate getDob() {
+        return dob;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public String getMobile() {
+        return mobile;
+    }
 
-	public String getAddress() {
-		return address;
-	}
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+    public Set<Role> getRoles() {
+        return roles;
+    }
 
-	public LocalDate getDob() {
-		return dob;
-	}
+    public void setRoles(Set<Role> role) {
+        this.roles = role;
+    }
 
-	public void setDob(LocalDate dob) {
-		this.dob = dob;
-	}
+    public void addRole(Role role) {
+        this.roles.add(role);
+    }
 
-	public String getMobile() {
-		return mobile;
-	}
+    public Set<Project> getProject() {
+        return project;
+    }
 
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
+    public void setProject(Set<Project> project) {
+        this.project = project;
+    }
 
-	public Set<Role> getRoles() {
-		return roles;
-	}
+    public void addProject(Project p) {
+        this.project.add(p);
+    }
 
-	public void setRoles(Set<Role> role) {
-		this.roles = role;
-	}
+ 
 
-	public void addRole(Role role) {
-		this.roles.add(role);
-	}
-
-	public Set<Project> getProject() {
-		return project;
-	}
-
-	public void setProject(Set<Project> project) {
-		this.project = project;
-	}
-
-	public void addProject(Project p) {
-		this.project.add(p);
-	}
-
-	
-
-	@Override
-	public String toString() {
-		return "User{" + "id=" + id + ", name='" + name + '\'' + ", email='" + email + '\'' + ", username='" + username
-				+ '\'' + ", password='" + password + '\'' + ", dob=" + dob + ", mobile='" + mobile + '\''
-				+ ", address='" + address + '\'' + ", imagePath='" + imagePath + '\'' + '}';
-	}
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", dob=" + dob +
+                ", mobile='" + mobile + '\'' +
+                ", address='" + address + '\'' +
+               
+                '}';
+    }
 }

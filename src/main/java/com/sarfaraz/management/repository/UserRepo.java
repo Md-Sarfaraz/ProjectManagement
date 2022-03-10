@@ -1,5 +1,11 @@
 package com.sarfaraz.management.repository;
 
+import com.sarfaraz.management.model.dto.NameAndRole;
+import com.sarfaraz.management.model.dto.NameWithRole;
+import com.sarfaraz.management.model.dto.OnlyNameAndEmail;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -7,9 +13,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.sarfaraz.management.model.User;
-import com.sarfaraz.management.model.dto.NameAndRole;
-import com.sarfaraz.management.model.dto.NameWithRole;
-import com.sarfaraz.management.model.dto.OnlyNameAndEmail;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +29,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     Optional<User> findByNameAndEmail(String name, String email);
 
-    @Query(value = "select distinct new com.bug.tracker.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) " +
+    @Query(value = "select distinct new com.sarfaraz.management.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) " +
             "from User u left join u.roles r")
     Set<NameAndRole> getAllWithRoles();
 
@@ -49,8 +52,10 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
 
     //TODO work in progress below
+    
 
-    @Query(value = "select distinct new com.bug.tracker.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) " +
+
+    @Query(value = "select distinct new com.sarfaraz.management.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) " +
             "from User u left join u.roles r join u.project p where p.id=:pid")
     Set<NameAndRole> getAllRelated(@Param("pid") Long id);
 

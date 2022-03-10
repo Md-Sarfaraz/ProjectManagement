@@ -24,6 +24,7 @@ public interface RoleRepo extends JpaRepository<Role, Long> {
 
         Roles(String desc) {
             this.desc = desc;
+          
         }
 
         public String getDetails() {

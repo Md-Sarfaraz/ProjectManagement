@@ -1,6 +1,6 @@
 package com.sarfaraz.management.model;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -20,7 +20,7 @@ public class Role {
     private String name;
     private String detail;
 
- 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
     private Set<User> users = new HashSet<>();
 
