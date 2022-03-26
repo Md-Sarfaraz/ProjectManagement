@@ -1,14 +1,21 @@
 package com.sarfaraz.management.model;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
-import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "projects")
@@ -16,8 +23,8 @@ public class Project {
 
 	@Id
 	@GeneratedValue(generator = "project_id_sec", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "project_id_sec", sequenceName = "jpa_sequence", allocationSize = 5)
-	@Column(nullable = false, precision = 5)
+	@SequenceGenerator(name = "project_id_sec", sequenceName = "projects_sequence", allocationSize = 5)
+	@Column(nullable = false, updatable = false,precision = 5)
 	private Long id;
 	@NotBlank(message = " Project Name Cannot Be Blank")
 	private String name;
@@ -31,8 +38,7 @@ public class Project {
 	private LocalDate updated;
 	@NotBlank(message = "Project Status Must Be Specified")
 	private String status;
-
-	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "project")
+	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "projects")
 	private Set<User> users = new HashSet<>();
 
 	public Project(long id) {

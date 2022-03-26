@@ -53,10 +53,7 @@ public class UserCtrl {
         return "user/profile";
     }
 */
-    @GetMapping(path = {"/all", "list", "/", ""})
-    public String getAll() {
-        return "user/users";
-    }
+  
 
     @GetMapping(path = {"/manage-role"})
     public String roleManage(Model model) {
@@ -64,50 +61,7 @@ public class UserCtrl {
         return "user/user-roles";
     }
 
-    @GetMapping(path = {"/register", "/add"})
-    public String register(User user) {
-        user.setAddress("Asansol Railpar");
-        user.setName("Sarfaraz from This");
-        user.setEmail("sarfaraz@gmail.com");
-        user.setMobile("073085720");
-        user.setPassword("pass");
-        user.setDob(LocalDate.now());
-        return "user/register";
-    }
 
-
-    @PostMapping(path = {"/save"})
-    public String saveUser(final @RequestParam(value = "image", required = false) MultipartFile file,
-                           @Valid User user, BindingResult result) {
-        if (result.hasErrors()) {
-            return "user/register";
-        }
-        FileInfo fileInfo = new FileInfo();
-        if (!file.isEmpty()) {
-            fileInfo = storageService.storeFile(file);
-        }
-//        user.setImagePath(fileInfo.getFileDownloadUri());
-//        userService.save(user);
-
-        return "redirect:/user/all";
-    }
-
-
-
-
-
-
-    @GetMapping(path = {"/view/{id}"})
-    public ModelAndView getSingleUser(final @PathVariable("id") long id) {
-        ModelAndView view = new ModelAndView();
-        Optional<User> opt = userService.getOne(id);
-        opt.orElseThrow(() -> new UserNotFoundException(("Can't find any Member with ID : " + id)));
-        opt.ifPresent(user -> {
-            view.addObject("user", user);
-            view.setViewName("user/profile");
-        });
-        return view;
-    }
 
     @PostMapping(path = {"/save/password"})
     public String updatePassword(User user, final @RequestParam("newpassword") String pass) {
@@ -115,7 +69,6 @@ public class UserCtrl {
             boolean res = userService.updatePassword(user.getId(), user.getPassword(), pass);
             log.warn(String.format("User with ID:%s changed thier password", user.getId()));
         }
-
         return "redirect:/user/profile";
     }
 
@@ -132,12 +85,6 @@ public class UserCtrl {
 //        userService.updateUser(user);
 
         return "redirect:/user/all";
-    }
-
-    @PostMapping(path = {"/delete"})
-    public ResponseEntity<String> deleteUser(@RequestParam("id") Long uid) {
-        //userService.delete(uid);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

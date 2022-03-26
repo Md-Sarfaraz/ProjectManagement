@@ -5,6 +5,8 @@ import com.sarfaraz.management.model.Role;
 import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.NameAndRole;
 import com.sarfaraz.management.model.dto.OnlyNameAndEmail;
+import com.sarfaraz.management.model.dto.UserAllInfo;
+import com.sarfaraz.management.model.dto.UserOnlyDTO;
 import com.sarfaraz.management.repository.RoleRepo;
 import com.sarfaraz.management.repository.UserRepo;
 import static com.sarfaraz.management.repository.RoleRepo.Roles.ROLE_PUBLIC;
@@ -50,17 +52,19 @@ public class UserService {
 		return userRepo.getAllWithRoles();
 	}
 
-	public void save(User user) {
+	@Transactional
+	public long save(User user) {
 		// user.setPassword(encoder.encode(user.getPassword()));
-		user.setPassword(user.getPassword());
 		if (user.getRoles().isEmpty()) {
 			Optional<Role> roleOP = roleRepo.findByName(ROLE_PUBLIC.name());
 			user.addRole(roleOP.orElse(new Role(ROLE_PUBLIC.name(), ROLE_PUBLIC.getDetails())));
 		}
-		userRepo.save(user);
+		User u = userRepo.save(user);
+		return u.getId();
 	}
 
-	public void updateUser(User user) {
+	@Transactional
+	public long updateUser(User user) {
 		User old = userRepo.getById(user.getId());
 		if (!user.getEmail().isBlank())
 			old.setEmail(user.getEmail());
@@ -73,7 +77,9 @@ public class UserService {
 //        if (!user.getImagePath().isBlank()) old.setImagePath(user.getImagePath());
 		if (!user.getDob().toString().isBlank())
 			old.setDob(user.getDob());
-		userRepo.save(old);
+		User u = userRepo.save(old);
+
+		return u.getId();
 	}
 
 	@Transactional
@@ -88,9 +94,9 @@ public class UserService {
 			 * userRepo.updateUserPasswod(encoder.encode(newPass), user.getId());
 			 * log.info("User New Password : " + newPass); }
 			 */
-			if (oldPass == user.getPassword()) {
+			if (oldPass.equals(user.getPassword())) {
 				result = userRepo.updateUserPasswod(newPass, user.getId());
-				log.info("User New Password : " + newPass);
+				log.info("User New Password : " + newPass); // for testing and should be removed
 			}
 		}
 		return result > 0;
@@ -107,6 +113,11 @@ public class UserService {
 
 	public Optional<User> findByUsername(String username) {
 		return userRepo.findByUsername(username);
+	}
+
+	public Page<User> findByName(String name, int page, int size, String sort) {
+		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sort));
+		return userRepo.findByName(name, pageable);
 	}
 
 	public Optional<User> findByEmail(String email) {
@@ -137,9 +148,23 @@ public class UserService {
 		return userRepo.getAllByProjectID(projectID);
 	}
 
-	public Page<User> sortedByName(int page, int size) {
+//TODO checing
+	public UserAllInfo getAllwithprojectandroles(Long uid) {
+
+		return userRepo.getOneWithProjectAndRole(uid);
+	}
+
+	@Transactional
+	public Page<UserOnlyDTO> sortedByName(int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size, Sort.by("name"));
-		Page<User> users = userRepo.findAll(pageable);
+		Page<UserOnlyDTO> users = userRepo.findAllOnlyUser(pageable);
+		return users;
+	}
+
+	@Transactional
+	public Page<UserOnlyDTO> sortedByfield(int page, int size, String sort) {
+		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sort));
+		Page<UserOnlyDTO> users = userRepo.findAllOnlyUser(pageable);
 		return users;
 	}
 }

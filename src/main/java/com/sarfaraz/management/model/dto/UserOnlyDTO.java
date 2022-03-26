@@ -1,30 +1,28 @@
 package com.sarfaraz.management.model.dto;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
-import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public interface UserOnlyDTO {
 
-    Long getId();
+	Long getId();
 
-    String getName();
+	String getName();
 
-    String getEmail();
+	String getEmail();
 
-    String getUsername();
+	String getUsername();
 
-    String getPassword();
+	String getPassword();
 
-    LocalDate getDob();
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	LocalDate getDob();
 
-    String getMobile();
+	String getMobile();
 
-    String getAddress();
+	String getAddress();
 
-    boolean getActive();
+	boolean getActive();
 
-    String getImagePath();
 }

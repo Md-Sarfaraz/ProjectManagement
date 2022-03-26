@@ -3,6 +3,8 @@ package com.sarfaraz.management.service;
 import com.sarfaraz.management.model.Project;
 import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.NameAndRole;
+import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
+import com.sarfaraz.management.model.dto.UserOnlyDTO;
 import com.sarfaraz.management.repository.ProjectRepo;
 import com.sarfaraz.management.repository.UserRepo;
 import org.json.JSONArray;
@@ -11,6 +13,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
@@ -39,12 +45,13 @@ public class ProjectService {
 		return repo.findOnlyProjects();
 	}
 
-	public void save(Project project) {
+	public Long save(Project project) {
 		if (project.getCreated() == null)
 			project.setCreated(LocalDate.now());
 		if (!(project.getId() == null || project.getId() == 0))
 			project.setUpdated(LocalDate.now());
-		repo.save(project);
+			Project p =  repo.save(project);
+			return p.getId();
 
 	}
 
@@ -75,7 +82,7 @@ public class ProjectService {
 		Optional<Project> opt = repo.findById(projectID);
 		opt.ifPresent(project -> {
 			User user = userRepo.getOne(userID);
-			user.getProject().remove(project);
+			user.getProjects().remove(project);
 			project.getUsers().remove(user);
 			repo.save(project);
 			log.info("Adding User Done");
@@ -97,5 +104,11 @@ public class ProjectService {
 	@Transactional
 	public Set<NameAndRole> getAllRelatedUsers(Long id) {
 		return repo.getRelatedUserWithRoles(id);
+	}
+
+	public Page<ProjectOnlyDTO> sortedByfield(int page, int size, String sort) {
+		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sort));
+		Page<ProjectOnlyDTO> projects = repo.findAllOnlyProject(pageable);
+		return projects;
 	}
 }
