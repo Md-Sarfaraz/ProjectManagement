@@ -76,7 +76,7 @@ public class UserController {
 
 	@GetMapping(path = { "/search" })
 	public ResponseEntity<ResponseData> searchUserByField(final @RequestParam("name") Optional<String> name,
-			final @RequestParam("email") Optional<String> email,
+			
 			final @RequestParam(value = "page", required = false, defaultValue = "1") int page,
 			final @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {

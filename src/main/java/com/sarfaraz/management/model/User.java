@@ -42,14 +42,19 @@ public class User {
 	@JoinTable(name = "users_project", joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"))
 	private Set<Project> projects = new HashSet<>();
 
+	public User() {
+	}
+
 	public User(Long id) {
 		this.id = id;
 	}
 
-	public User() {
+	public User(String name) {
+		this.name = name;
 	}
 
-	public User(String name) {
+	public User(Long id, @NotBlank String name) {
+		this.id = id;
 		this.name = name;
 	}
 

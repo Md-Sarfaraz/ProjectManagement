@@ -46,12 +46,14 @@ public class ProjectService {
 	}
 
 	public Long save(Project project) {
-		if (project.getCreated() == null)
+		if (project.getId() == null) {
 			project.setCreated(LocalDate.now());
+			log.info(project.toString());
+		}
 		if (!(project.getId() == null || project.getId() == 0))
 			project.setUpdated(LocalDate.now());
-			Project p =  repo.save(project);
-			return p.getId();
+		Project p = repo.save(project);
+		return p.getId();
 
 	}
 
@@ -69,7 +71,7 @@ public class ProjectService {
 	public void addUserToProject(Long projectID, Long userID) {
 		Optional<Project> opt = repo.findById(projectID);
 		opt.ifPresent(project -> {
-			User user = userRepo.getOne(userID);
+			User user = userRepo.getById(userID);
 			project.addUser(user);
 			repo.save(project);
 			log.info("Adding User Done");
@@ -81,7 +83,7 @@ public class ProjectService {
 	public void removeUserFromProject(Long projectID, Long userID) {
 		Optional<Project> opt = repo.findById(projectID);
 		opt.ifPresent(project -> {
-			User user = userRepo.getOne(userID);
+			User user = userRepo.getById(userID);
 			user.getProjects().remove(project);
 			project.getUsers().remove(user);
 			repo.save(project);
@@ -102,13 +104,25 @@ public class ProjectService {
 	 */
 
 	@Transactional
+	public Set<User> getAllUserByProjectID(Long id) throws JSONException {
+		Set<User> users = repo.getAllUserByProjectID(id);
+		return users;
+	}
+
+	@Transactional
 	public Set<NameAndRole> getAllRelatedUsers(Long id) {
 		return repo.getRelatedUserWithRoles(id);
 	}
 
-	public Page<ProjectOnlyDTO> sortedByfield(int page, int size, String sort) {
+	public Page<ProjectOnlyDTO> sortedByField(int page, int size, String sort) {
 		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sort));
 		Page<ProjectOnlyDTO> projects = repo.findAllOnlyProject(pageable);
+		return projects;
+	}
+
+	public Page<ProjectOnlyDTO> searchByField(String name, int page, int size, String sort) {
+		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sort));
+		Page<ProjectOnlyDTO> projects = repo.findByname(name, pageable);
 		return projects;
 	}
 }

@@ -16,6 +16,6 @@ public class TicketAttachment {
 	private String detail;
 	private LocalDate added;
 	@ManyToOne
-	private Ticket ticket;
+	private Ticket issue;
 
 }

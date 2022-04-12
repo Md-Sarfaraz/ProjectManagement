@@ -1,39 +1,51 @@
 package com.sarfaraz.management.model.dto;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public interface TicketListDTO {
+	Long getId();
 
-    Long getId();
+	String getName();
 
-    String getName();
+	String getDetail();
 
-    String getStatus();
+	// @JsonFormat(pattern = "yyyy-MM-dd")
+	// @Convert(converter = LocalDateAttributeConverter.class)
+	@Value("#{target.created.toString()}")
+	String getCreated();
 
-    String getPriority();
+	// @JsonFormat(pattern = "yyyy-MM-dd")
+	// @Convert(converter = LocalDateAttributeConverter.class)
+	@Value("#{target.updated.toString()}")
+	String getUpdated();
 
-    TypeDTO getType();
+	// @JsonFormat(pattern = "yyyy-MM-dd")
+	// @Convert(converter = LocalDateAttributeConverter.class)
+	@Value("#{target.lastDate.toString()}")
+	String getLasDate();
 
-    ProjectDTO getProject();
+	String getStatus();
 
-    UserDTO getAssignedUser();
+	String getPriority();
 
-    UserDTO getSubmitter();
+	String getType();
 
-    interface TypeDTO {
+	ProjectDTO getProject();
 
-        Long getId();
+	UserDTO getAssignedUser();
 
-        String getName();
-    }
+	UserDTO getSubmitter();
 
-    interface ProjectDTO {
-        Long getId();
+	interface ProjectDTO {
+		Long getId();
 
-        String getName();
-    }
+		String getName();
+	}
 
-    interface UserDTO {
-        Long getId();
+	interface UserDTO {
+		Long getId();
 
-        String getName();
-    }
+		String getName();
+	}
+
 }

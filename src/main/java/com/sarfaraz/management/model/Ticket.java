@@ -1,186 +1,174 @@
 package com.sarfaraz.management.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
+import org.springframework.format.annotation.DateTimeFormat;
 
-public class Ticket {
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sarfaraz.management.config.LocalDateAttributeConverter;
 
-    @Id
-    @GeneratedValue(generator = "id_sec", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name = "id_sec", sequenceName = "jpa_sequence", allocationSize = 5)
-    @Column(nullable = false, precision = 5)
-    private Long id;
-    private String name;
-    private String detail;
-    private String status;
-    private String priority;
-    private LocalDate created;
-    private LocalDate updated;
-    private LocalDate lastDate;
+@Entity
+@Table(name = "tickets")
+public class Ticket implements Serializable {
 
-    @OneToMany(mappedBy = "ticket")
-    @JsonIgnore
-    private Set<TicketAttachment> attachment = new HashSet<>();
+	@Id
+	@GeneratedValue(generator = "id_sec", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "id_sec", sequenceName = "ticket_sequence", allocationSize = 5)
+	@Column(nullable = false, precision = 5)
+	private Long id;
+	private String name;
+	private String detail;
+	private String type;
+	private String status;
+	private String priority;
+	// @Convert(converter = LocalDateAttributeConverter.class)
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate created;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	// @Convert(converter = LocalDateAttributeConverter.class)
+	private LocalDate updated;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	// @Convert(converter = LocalDateAttributeConverter.class)
+	private LocalDate lastDate;
 
-    @ManyToOne
-    @JoinColumn(name = "fk_project")
-    private Project project;
+	@ManyToOne
+	@JoinColumn(name = "fk_project")
+	private Project project;
 
-    @ManyToOne
+	@ManyToOne
+	@JoinColumn(name = "fk_assigneduser")
+	private User assignedUser;
 
-    @JoinColumn(name = "fk_type")
-    private TicketType type;
+	@ManyToOne
+	@JoinColumn(name = "fk_submitter")
+	private User submitter;
 
-    @ManyToOne
-    @JoinColumn(name = "fk_assigneduser")
-    private User assignedUser;
+	public Ticket() {
+	}
 
-    @ManyToOne
-    @JoinColumn(name = "fk_submitter")
-    private User submitter;
+	public Long getId() {
+		return id;
+	}
 
-    public Ticket() {
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getDetail() {
+		return detail;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
 
-    public String getDetail() {
-        return detail;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setDetail(String detail) {
-        this.detail = detail;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public LocalDate getCreated() {
+		return created;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setCreated(LocalDate created) {
+		this.created = created;
+	}
 
-    public LocalDate getCreated() {
-        return created;
-    }
+	public LocalDate getUpdated() {
+		return updated;
+	}
 
-    public void setCreated(LocalDate created) {
-        this.created = created;
-    }
+	public void setUpdated(LocalDate updated) {
+		this.updated = updated;
+	}
 
-    public LocalDate getUpdated() {
-        return updated;
-    }
+	public LocalDate getLastDate() {
+		return lastDate;
+	}
 
-    public void setUpdated(LocalDate updated) {
-        this.updated = updated;
-    }
+	public void setLastDate(LocalDate lastDate) {
+		this.lastDate = lastDate;
+	}
 
-    public LocalDate getLastDate() {
-        return lastDate;
-    }
+	public Project getProject() {
+		return project;
+	}
 
-    public void setLastDate(LocalDate lastDate) {
-        this.lastDate = lastDate;
-    }
+	public void setProject(Project project) {
+		this.project = project;
+	}
 
-    public Set<TicketAttachment> getAttachment() {
-        return attachment;
-    }
+	public String getType() {
+		return type;
+	}
 
-    public void addAttachment(TicketAttachment attachment) {
-        this.attachment.add(attachment);
-    }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-    public void setAttachment(Set<TicketAttachment> attachment) {
-        this.attachment = attachment;
-    }
+	public User getUser() {
+		return assignedUser;
+	}
 
-    public Project getProject() {
-        return project;
-    }
+	public void setUser(User assignedUser) {
+		this.assignedUser = assignedUser;
+	}
 
-    public void setProject(Project project) {
-        this.project = project;
-    }
+	public String getPriority() {
+		return priority;
+	}
 
-    public TicketType getType() {
-        return type;
-    }
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
 
-    public void setType(TicketType type) {
-        this.type = type;
-    }
+	public User getAssignedUser() {
+		return assignedUser;
+	}
 
-    public User getUser() {
-        return assignedUser;
-    }
+	public void setAssignedUser(User assignedUser) {
+		this.assignedUser = assignedUser;
+	}
 
-    public void setUser(User assignedUser) {
-        this.assignedUser = assignedUser;
-    }
+	public User getSubmitter() {
+		return submitter;
+	}
 
-    public String getPriority() {
-        return priority;
-    }
+	public void setSubmitter(User submitter) {
+		this.submitter = submitter;
+	}
 
-    public void setPriority(String priority) {
-        this.priority = priority;
-    }
+	@Override
+	public String toString() {
 
-    public User getAssignedUser() {
-        return assignedUser;
-    }
-
-    public void setAssignedUser(User assignedUser) {
-        this.assignedUser = assignedUser;
-    }
-
-    public User getSubmitter() {
-        return submitter;
-    }
-
-    public void setSubmitter(User submitter) {
-        this.submitter = submitter;
-    }
-
-    @Override
-    public String toString() {
-        return "Ticket{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", detail='" + detail + '\'' +
-                ", status='" + status + '\'' +
-                ", priority='" + priority + '\'' +
-                ", created=" + created +
-                ", updated=" + updated +
-                ", lastDate=" + lastDate +
-                ", attachment=" + attachment +
-                ", project=" + project +
-                ", type=" + type +
-                ", assignedUser=" + assignedUser +
-                ", submitter=" + submitter +
-                '}';
-    }
+		return "Ticket{" + "id=" + id + ", name='" + name + '\'' + ", detail='" + detail + '\'' + ", status='" + status
+				+ '\'' + ", priority='" + priority + '\'' + ", created=" + created + ", updated=" + updated
+				+ ", lastDate=" + lastDate + ", project=" + project.getId() + " : " + project.getName() + ", type="
+				+ type + ", assignedUser=" + assignedUser + ", submitter=" + submitter.getId() + " : "
+				+ submitter.getName() + '}';
+	}
 }

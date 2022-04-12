@@ -30,11 +30,14 @@ public interface ProjectRepo extends JpaRepository<Project, Long> {
     @Query(value = "select p from Project p")
     List<Project> findOnlyProjects();
     
+    @Query(value = "select distinct p from Project p where lower(p.name) like lower(concat('%',?1,'%'))")
+	Page<ProjectOnlyDTO> findByname(String name,Pageable pageable);
+    
 	@Query(value = "select distinct p from Project p")
 	Page<ProjectOnlyDTO> findAllOnlyProject(Pageable pageable);
 
     @Query(value = "select u from Project p join p.users u where p.id=:pid")
-    List<User> getAllUserByProjectID(@Param("pid") Long pid);
+    Set<User> getAllUserByProjectID(@Param("pid") Long pid);
 
     @Query(value = "select distinct new com.sarfaraz.management.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) " +
             "from User u left join u.roles r join u.projects p where p.id=:pid")

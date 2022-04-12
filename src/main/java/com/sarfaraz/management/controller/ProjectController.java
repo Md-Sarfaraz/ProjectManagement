@@ -1,6 +1,7 @@
 package com.sarfaraz.management.controller;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,13 +22,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sarfaraz.management.exception.UserNotFoundException;
 import com.sarfaraz.management.model.Project;
 import com.sarfaraz.management.model.ResponseData;
+import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.NameAndRole;
 import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
 import com.sarfaraz.management.service.ProjectService;
+import com.sarfaraz.management.service.UserService;
 
 @RestController
 @RequestMapping(value = { "/api/project" })
@@ -36,10 +38,12 @@ public class ProjectController {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private final ProjectService service;
+	private final UserService userService;
 
 	@Autowired
-	public ProjectController(ProjectService service) {
+	public ProjectController(ProjectService service, UserService userService) {
 		this.service = service;
+		this.userService = userService;
 	}
 
 	@GetMapping(value = { "/list", "", "/", "/all" })
@@ -48,7 +52,7 @@ public class ProjectController {
 			final @RequestParam(value = "size", required = false, defaultValue = "20") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort)
 			throws JSONException {
-		Page<ProjectOnlyDTO> projects = service.sortedByfield(page, size, sort);
+		Page<ProjectOnlyDTO> projects = service.sortedByField(page, size, sort);
 
 		ResponseData response = new ResponseData(projects.getTotalPages(), projects.getTotalElements(),
 				projects.getSize(), projects.getNumber() + 1, projects.toList());
@@ -56,7 +60,7 @@ public class ProjectController {
 	}
 
 	@RequestMapping(value = { "/save", "/update" }, method = RequestMethod.POST, consumes = "application/json")
-	public ResponseEntity<Map<String, Long>> addProject(@RequestBody Project project, HttpServletRequest request){
+	public ResponseEntity<Map<String, Long>> addProject(@RequestBody Project project, HttpServletRequest request) {
 		long savedId = service.save(project);
 		log.info(project.toString());
 		Map<String, Long> res = Map.of("id", savedId);
@@ -76,8 +80,25 @@ public class ProjectController {
 		return new ResponseEntity<>(Map.of("status", status), HttpStatus.OK);
 	}
 
-	@GetMapping({ "/detail/users" })
-	public Set<NameAndRole> getMembers(@RequestParam("id") Long id) {
+	@GetMapping(path = { "/search" })
+	public ResponseEntity<ResponseData> searchProjectByField(final @RequestParam("name") Optional<String> name,
+			final @RequestParam(value = "page", required = false, defaultValue = "1") int p,
+			final @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {
+
+		Page<ProjectOnlyDTO> page = service.searchByField(name.get(), p, size, sort);
+
+		log.info(page.toList().toString());
+
+		ResponseData response = new ResponseData(page.getTotalPages(), page.getTotalElements(), page.getSize(),
+				page.getNumber() + 1, page.toList());
+		return new ResponseEntity<>(response, HttpStatus.OK);
+//		Map<String, String> user = Map.of("name", name.orElse("Null"), "email", email.orElse("Null"));
+		// return users;
+	}
+
+	@GetMapping({ "/view" })
+	public Set<NameAndRole> getOneProjet(@RequestParam("id") Long id) {
 		return service.getAllRelatedUsers(id);
 	}
 
@@ -88,17 +109,22 @@ public class ProjectController {
 	 * ticketService.getAllTicketsRelatedToProject(id); }
 	 */
 
-	@PostMapping({ "/user/add" })
-	public ResponseEntity<String> addUsertoProject(@RequestParam("pid") Long pid, @RequestParam("uid") Long uid) {
-		service.addUserToProject(pid, uid);
-		log.info(pid + " : " + uid);
+	@GetMapping({ "/users/all", "/users", "/users/list" })
+	public Set<User> listAllUsers(@RequestParam Long pid) {
+		Set<User> users = service.getAllUserByProjectID(pid);
+		return users;
+	}
+
+	@CrossOrigin
+	@RequestMapping(value = { "/users/add" }, method = RequestMethod.POST, consumes = "application/json")
+	public ResponseEntity<String> addUsertoProject(@RequestBody Map<String, Long> json) {
+		service.addUserToProject(json.get("pid"), json.get("uid"));
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
-	@PostMapping({ "/user/delete" })
-	public ResponseEntity<String> deleteUserFromProject(@RequestParam("pid") Long pid, @RequestParam("uid") Long uid) {
-		service.removeUserFromProject(pid, uid);
-		log.info("In Delete :: pid : " + pid + ", Uid : " + uid);
+	@PostMapping({ "/users/delete" })
+	public ResponseEntity<String> deleteUserFromProject(@RequestBody Map<String, Long> json) {
+		service.removeUserFromProject(json.get("pid"), json.get("uid"));
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 }

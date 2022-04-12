@@ -148,9 +148,7 @@ public class UserService {
 		return userRepo.getAllByProjectID(projectID);
 	}
 
-//TODO checing
 	public UserAllInfo getAllwithprojectandroles(Long uid) {
-
 		return userRepo.getOneWithProjectAndRole(uid);
 	}
 
@@ -167,4 +165,6 @@ public class UserService {
 		Page<UserOnlyDTO> users = userRepo.findAllOnlyUser(pageable);
 		return users;
 	}
+	
+	
 }
