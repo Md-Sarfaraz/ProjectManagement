@@ -9,6 +9,9 @@ import com.sarfaraz.management.model.dto.UserAllInfo;
 import com.sarfaraz.management.model.dto.UserOnlyDTO;
 import com.sarfaraz.management.repository.RoleRepo;
 import com.sarfaraz.management.repository.UserRepo;
+
+import lombok.RequiredArgsConstructor;
+
 import static com.sarfaraz.management.repository.RoleRepo.Roles.ROLE_PUBLIC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +20,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @Service
-public class UserService {
+@RequiredArgsConstructor
+@Transactional
+public class UserService implements UserDetailsService {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -35,24 +46,29 @@ public class UserService {
 	private final RoleRepo roleRepo;
 	// private final PasswordEncoder encoder;
 
-	@Autowired
-	public UserService(UserRepo userRepo, RoleRepo roleRepo) {
-		this.userRepo = userRepo;
-		this.roleRepo = roleRepo;
-		// this.encoder = encoder;
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+		Optional<User> opt = userRepo.findByUsername(username);
+		if (opt.isEmpty())
+			throw new UsernameNotFoundException("User Not Found In the Database");
+		User user = opt.get();
+		Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+		user.getRoles().forEach(role -> {
+			authorities.add(new SimpleGrantedAuthority(role.getName()));
+		});
+		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+				authorities);
 	}
 
-	@Transactional
 	public List<User> listAll() {
 		return userRepo.findAll();
 	}
 
-	@Transactional
 	public Set<NameAndRole> listAllWithRoles() {
 		return userRepo.getAllWithRoles();
 	}
 
-	@Transactional
 	public long save(User user) {
 		// user.setPassword(encoder.encode(user.getPassword()));
 		if (user.getRoles().isEmpty()) {
@@ -63,7 +79,6 @@ public class UserService {
 		return u.getId();
 	}
 
-	@Transactional
 	public long updateUser(User user) {
 		User old = userRepo.getById(user.getId());
 		if (!user.getEmail().isBlank())
@@ -82,7 +97,6 @@ public class UserService {
 		return u.getId();
 	}
 
-	@Transactional
 	public boolean updatePassword(Long id, String oldPass, String newPass) {// 3 param
 		int result = 0;
 		if (id != null && !newPass.isBlank()) {
@@ -124,7 +138,6 @@ public class UserService {
 		return userRepo.findByEmail(email);
 	}
 
-	@Transactional
 	public void updateRole(String name, String email, Set<Role> roles) {
 		Optional<User> opt = userRepo.findByNameAndEmail(name, email);
 		opt.ifPresent(user -> {
@@ -152,19 +165,16 @@ public class UserService {
 		return userRepo.getOneWithProjectAndRole(uid);
 	}
 
-	@Transactional
 	public Page<UserOnlyDTO> sortedByName(int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size, Sort.by("name"));
 		Page<UserOnlyDTO> users = userRepo.findAllOnlyUser(pageable);
 		return users;
 	}
 
-	@Transactional
 	public Page<UserOnlyDTO> sortedByfield(int page, int size, String sort) {
 		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(sort));
 		Page<UserOnlyDTO> users = userRepo.findAllOnlyUser(pageable);
 		return users;
 	}
-	
-	
+
 }

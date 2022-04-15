@@ -33,7 +33,7 @@ public class User {
 	private boolean active;
 
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
 	@JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
 	private Set<Role> roles = new HashSet<>();
 

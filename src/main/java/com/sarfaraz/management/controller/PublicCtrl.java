@@ -13,38 +13,35 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 
-@Controller
-@RequestMapping(value = { "", "/" })
+//@Controller
+//@RequestMapping(value = { "", "/" })
 public class PublicCtrl {
 
-	@RequestMapping(value = { "/", "", "index", "home" })
-	private Object index(HttpSession session) {
-		JSONObject obj = new JSONObject().put("status", true);
-		// return new ResponseEntity<String>(obj.toString(), HttpStatus.OK);
-		return obj;
-	}
-	
-	
-	
+//	@RequestMapping(value = { "/", "", "index", "home" })
+//	private Object index(HttpSession session) {
+//		JSONObject obj = new JSONObject().put("status", true);
+//		// return new ResponseEntity<String>(obj.toString(), HttpStatus.OK);
+//		return obj;
+//	}
 
-	@GetMapping("/login")
-	private String login() {
-		return "login/login";
-	}
+//	@GetMapping("/login")
+//	private ResponseEntity<String> login() {
+//		return ResponseEntity.ok().body("Not Done");
+//	}
 
-	@RequestMapping(value = { "/register" })
-	private String register() {
-		return "user/register";
-	}
+//	@RequestMapping(value = { "/register" })
+//	private String register() {
+//		return "user/register";
+//	}
 
-	@RequestMapping(value = { "/forgot" })
-	private String forgot() {
-		return "login/forgot-password";
-	}
-
-	@RequestMapping(value = { "/recover-password" })
-	private String recoverPassword() {
-		return "login/recover-password";
-	}
+//	@RequestMapping(value = { "/forgot" })
+//	private String forgot() {
+//		return "login/forgot-password";
+//	}
+//
+//	@RequestMapping(value = { "/recover-password" })
+//	private String recoverPassword() {
+//		return "login/recover-password";
+//	}
 
 }

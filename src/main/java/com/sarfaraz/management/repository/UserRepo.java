@@ -23,12 +23,13 @@ import java.util.Set;
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
 
-	@Query(value = "select u from User u join fetch u.roles where u.username=:username")
-	Optional<User> findByUsername(@Param("username") String username);
+//	@Query(value = "select u from User u join fetch u.roles where u.username=:username")
+//	Optional<User> findByUsername(@Param("username") String username);
+	Optional<User> findByUsername(String username);
 
 	@Query(value = "select u from User u where lower(concat(u.name, u.email, u.mobile, u.username)) like lower(concat('%',?1,'%'))")
-	Page<User> findByName(String name, Pageable  pageable);
-	
+	Page<User> findByName(String name, Pageable pageable);
+
 	@Query(value = "select u from User u join fetch u.roles where u.email=:email")
 	Optional<User> findByEmail(@Param("email") String email);
 
