@@ -1,10 +1,8 @@
 package com.sarfaraz.management.controller;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -23,13 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sarfaraz.management.exception.UserNotFoundException;
-import com.sarfaraz.management.model.ResponseData;
-import com.sarfaraz.management.model.Role;
+import com.sarfaraz.management.model.ResponsePageable;
 import com.sarfaraz.management.model.User;
-import com.sarfaraz.management.model.dto.NameAndRole;
 import com.sarfaraz.management.model.dto.UserAllInfo;
 import com.sarfaraz.management.model.dto.UserOnlyDTO;
-import com.sarfaraz.management.repository.RoleRepo;
 import com.sarfaraz.management.service.UserService;
 
 @RestController
@@ -43,20 +38,20 @@ public class UserController {
 		this.userService = userService;
 	}
 
-	@GetMapping("/all/with/roles")
-	public Set<NameAndRole> allUserWithRoles() throws JSONException {
-		return userService.listAllWithRoles();
-	}
+//	@GetMapping("/all/with/roles")
+//	public Set<NameAndRole> allUserWithRoles() throws JSONException {
+//		return userService.listAllWithRoles();
+//	}
 
 	@GetMapping(value = { "/list" })
-	public ResponseEntity<ResponseData> getSortedPageable(
+	public ResponseEntity<ResponsePageable> getSortedPageable(
 			final @RequestParam(value = "page", required = false, defaultValue = "1") int page,
 			final @RequestParam(value = "size", required = false, defaultValue = "20") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort)
 			throws JSONException {
 		Page<UserOnlyDTO> users = userService.sortedByfield(page, size, sort);
 
-		ResponseData response = new ResponseData(users.getTotalPages(), users.getTotalElements(), users.getSize(),
+		ResponsePageable response = new ResponsePageable(users.getTotalPages(), users.getTotalElements(), users.getSize(),
 				users.getNumber() + 1, users.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -75,8 +70,8 @@ public class UserController {
 	}
 
 	@GetMapping(path = { "/search" })
-	public ResponseEntity<ResponseData> searchUserByField(final @RequestParam("name") Optional<String> name,
-			
+	public ResponseEntity<ResponsePageable> searchUserByField(final @RequestParam("name") Optional<String> name,
+
 			final @RequestParam(value = "page", required = false, defaultValue = "1") int page,
 			final @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {
@@ -85,14 +80,14 @@ public class UserController {
 
 		log.info(users.toList().toString());
 
-		ResponseData response = new ResponseData(users.getTotalPages(), users.getTotalElements(), users.getSize(),
+		ResponsePageable response = new ResponsePageable(users.getTotalPages(), users.getTotalElements(), users.getSize(),
 				users.getNumber() + 1, users.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 //		Map<String, String> user = Map.of("name", name.orElse("Null"), "email", email.orElse("Null"));
 		// return users;
 	}
 
-	@RequestMapping(value = {"/save"}, method = RequestMethod.POST, consumes = "application/json")
+	@RequestMapping(value = { "/save" }, method = RequestMethod.POST, consumes = "application/json")
 	public ResponseEntity<Map<String, Long>> save(@RequestBody User user) {
 		// log.error(user.toString());
 		long id = userService.save(user);
@@ -141,15 +136,15 @@ public class UserController {
 		return userService.listAll();
 	}
 
-	@RequestMapping(value = "/roles", method = RequestMethod.POST)
-	public ResponseEntity<String> updateUserRoles(final @RequestParam("name") String name,
-			final @RequestParam("email") String email, final @RequestParam("roles[]") String[] roleArr) {
-		// %5B%5D = [ ] (in request parameter)
-		Set<Role> roles = new HashSet<>();
-		for (String r : roleArr) {
-			roles.add(new Role(RoleRepo.Roles.valueOf(r).name(), RoleRepo.Roles.valueOf(r).getDetails()));
-		}
-		userService.updateRole(name, email, roles);
-		return new ResponseEntity<>("Done", HttpStatus.OK);
-	}
+//	@RequestMapping(value = "/roles", method = RequestMethod.POST)
+//	public ResponseEntity<String> updateUserRoles(final @RequestParam("name") String name,
+//			final @RequestParam("email") String email, final @RequestParam("roles[]") String[] roleArr) {
+//		// %5B%5D = [ ] (in request parameter)
+//		Set<Role> roles = new HashSet<>();
+//		for (String r : roleArr) {
+//			roles.add(new Role(RoleRepo.Roles.valueOf(r).name(), RoleRepo.Roles.valueOf(r).getDetails()));
+//		}
+//		userService.updateRole(name, email, roles);
+//		return new ResponseEntity<>("Done", HttpStatus.OK);
+//	}
 }

@@ -1,7 +1,7 @@
 package com.sarfaraz.management.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
+/*
 @ConfigurationProperties(prefix = "file")
 public class FileStorageProperties {
 
@@ -15,3 +15,4 @@ public class FileStorageProperties {
         this.uploadDir = uploadDir;
     }
 }
+*/

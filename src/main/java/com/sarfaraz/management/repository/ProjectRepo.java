@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 
 import com.sarfaraz.management.model.Project;
 import com.sarfaraz.management.model.User;
-import com.sarfaraz.management.model.dto.NameAndRole;
 import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
 
 @Repository
@@ -39,9 +38,9 @@ public interface ProjectRepo extends JpaRepository<Project, Long> {
     @Query(value = "select u from Project p join p.users u where p.id=:pid")
     Set<User> getAllUserByProjectID(@Param("pid") Long pid);
 
-    @Query(value = "select distinct new com.sarfaraz.management.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) " +
-            "from User u left join u.roles r join u.projects p where p.id=:pid")
-    Set<NameAndRole> getRelatedUserWithRoles(@Param("pid") Long id);
+//    @Query(value = "select distinct new com.sarfaraz.management.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) " +
+//            "from User u left join u.roles r join u.projects p where p.id=:pid")
+//    Set<NameAndRole> getRelatedUserWithRoles(@Param("pid") Long id);
 
 
 }

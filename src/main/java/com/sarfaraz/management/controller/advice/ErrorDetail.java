@@ -2,47 +2,35 @@ package com.sarfaraz.management.controller.advice;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorDetail {
 
 	private Date timestamp;
 	private String message;
-	private String details;
+	private String error;
+	private String path;
+	private int status;
 
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
+	public ErrorDetail(String message, String error, int status) {
+		this.timestamp = new Date();
 		this.message = message;
+		this.error = error;
+		this.status = status;
 	}
 
-	public String getDetails() {
-		return details;
-	}
-
-	public void setDetails(String details) {
-		this.details = details;
-	}
-
-	public ErrorDetail(Date timestamp, String message, String details) {
-		super();
-		this.timestamp = timestamp;
-
+	public ErrorDetail(String message, String error, int status, String path) {
+		this.timestamp = new Date();
 		this.message = message;
-		this.details = details;
-	}
-
-	public ErrorDetail() {
-		super();
-
+		this.error = error;
+		this.status = status;
+		this.path = path;
 	}
 
 }

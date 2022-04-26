@@ -1,18 +1,15 @@
 package com.sarfaraz.management.service;
 
 import com.sarfaraz.management.exception.DatabaseUpdateException;
-import com.sarfaraz.management.model.Role;
 import com.sarfaraz.management.model.User;
-import com.sarfaraz.management.model.dto.NameAndRole;
 import com.sarfaraz.management.model.dto.OnlyNameAndEmail;
 import com.sarfaraz.management.model.dto.UserAllInfo;
 import com.sarfaraz.management.model.dto.UserOnlyDTO;
-import com.sarfaraz.management.repository.RoleRepo;
 import com.sarfaraz.management.repository.UserRepo;
+import com.sarfaraz.management.repository.UserRepo.Roles;
 
 import lombok.RequiredArgsConstructor;
 
-import static com.sarfaraz.management.repository.RoleRepo.Roles.ROLE_PUBLIC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +40,7 @@ public class UserService implements UserDetailsService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private final UserRepo userRepo;
-	private final RoleRepo roleRepo;
+
 	// private final PasswordEncoder encoder;
 
 	@Override
@@ -55,7 +52,8 @@ public class UserService implements UserDetailsService {
 		User user = opt.get();
 		Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
 		user.getRoles().forEach(role -> {
-			authorities.add(new SimpleGrantedAuthority(role.getName()));
+			// authorities.add(new SimpleGrantedAuthority(role.getName()));
+			authorities.add(new SimpleGrantedAuthority(role));
 		});
 		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
 				authorities);
@@ -65,15 +63,10 @@ public class UserService implements UserDetailsService {
 		return userRepo.findAll();
 	}
 
-	public Set<NameAndRole> listAllWithRoles() {
-		return userRepo.getAllWithRoles();
-	}
-
 	public long save(User user) {
 		// user.setPassword(encoder.encode(user.getPassword()));
 		if (user.getRoles().isEmpty()) {
-			Optional<Role> roleOP = roleRepo.findByName(ROLE_PUBLIC.name());
-			user.addRole(roleOP.orElse(new Role(ROLE_PUBLIC.name(), ROLE_PUBLIC.getDetails())));
+			user.addRole(Roles.ROLE_PUBLIC.name());
 		}
 		User u = userRepo.save(user);
 		return u.getId();
@@ -125,6 +118,7 @@ public class UserService implements UserDetailsService {
 		log.info(String.format("User with ID : %s deleted successfully.", id));
 	}
 
+	
 	public Optional<User> findByUsername(String username) {
 		return userRepo.findByUsername(username);
 	}
@@ -138,16 +132,34 @@ public class UserService implements UserDetailsService {
 		return userRepo.findByEmail(email);
 	}
 
-	public void updateRole(String name, String email, Set<Role> roles) {
-		Optional<User> opt = userRepo.findByNameAndEmail(name, email);
+	public void updateRole(long id, Set<String> roles) {
+		Optional<User> opt = userRepo.findById(id);
 		opt.ifPresent(user -> {
-			user.getRoles().clear();
-			roles.forEach(r -> {
-				Optional<Role> opRole = roleRepo.findByName(r.getName());
-				user.addRole(opRole.orElse(r));
-			});
+			user.getRoles().addAll(roles);
 			userRepo.save(user);
 		});
+	}
+
+	public boolean addRole(long id, String role) {
+		Optional<User> opt = userRepo.findById(id);
+		if (opt.isEmpty())
+			return false;
+		opt.ifPresent(user -> {
+			user.getRoles().add(role);
+			userRepo.save(user);
+		});
+		return true;
+	}
+
+	public boolean removeRole(long id, String role) {
+		Optional<User> opt = userRepo.findById(id);
+		if (opt.isEmpty())
+			return false;
+		opt.ifPresent(user -> {
+			user.getRoles().remove(role);
+			userRepo.save(user);
+		});
+		return true;
 	}
 
 	public List<OnlyNameAndEmail> searchUser(String name) {

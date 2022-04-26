@@ -2,7 +2,7 @@ package com.sarfaraz.management.model;
 
 import java.util.List;
 
-public class ResponseData {
+public class ResponsePageable {
 	private int totalpage;
 	private long totaldata;
 	private int size;
@@ -49,7 +49,7 @@ public class ResponseData {
 		this.data = data;
 	}
 
-	public ResponseData(int totalpage, long totaldata, int size, int pagenumber, List data) {
+	public ResponsePageable(int totalpage, long totaldata, int size, int pagenumber, List data) {
 		super();
 		this.totalpage = totalpage;
 		this.totaldata = totaldata;
@@ -59,7 +59,7 @@ public class ResponseData {
 	}
 	
 
-	public ResponseData() {
+	public ResponsePageable() {
 		super();
 
 	}

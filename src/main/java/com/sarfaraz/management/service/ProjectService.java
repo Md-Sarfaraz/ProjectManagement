@@ -1,15 +1,13 @@
 package com.sarfaraz.management.service;
 
-import com.sarfaraz.management.model.Project;
-import com.sarfaraz.management.model.User;
-import com.sarfaraz.management.model.dto.NameAndRole;
-import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
-import com.sarfaraz.management.model.dto.UserOnlyDTO;
-import com.sarfaraz.management.repository.ProjectRepo;
-import com.sarfaraz.management.repository.UserRepo;
-import org.json.JSONArray;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.transaction.Transactional;
+
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import com.sarfaraz.management.model.Project;
+import com.sarfaraz.management.model.User;
+import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
+import com.sarfaraz.management.repository.ProjectRepo;
+import com.sarfaraz.management.repository.UserRepo;
 
 @Service
 public class ProjectService {
@@ -110,8 +106,10 @@ public class ProjectService {
 	}
 
 	@Transactional
-	public Set<NameAndRole> getAllRelatedUsers(Long id) {
-		return repo.getRelatedUserWithRoles(id);
+	public Set<User> getAllRelatedUsers(Long id) {
+		// TODO must refactor
+		// return repo.getRelatedUserWithRoles(id);
+		throw new RuntimeException("getAllRelatedUser in ProjectService must Refactor");
 	}
 
 	public Page<ProjectOnlyDTO> sortedByField(int page, int size, String sort) {

@@ -1,6 +1,6 @@
 package com.sarfaraz.management.controller;
 
-
+/*
 import com.sarfaraz.management.model.FileInfo;
 import com.sarfaraz.management.service.FileStorageService;
 import org.slf4j.Logger;
@@ -72,3 +72,5 @@ public class FilesCtrl {
     }
 
 }
+
+*/

@@ -24,9 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sarfaraz.management.exception.UserNotFoundException;
 import com.sarfaraz.management.model.Project;
-import com.sarfaraz.management.model.ResponseData;
+import com.sarfaraz.management.model.ResponsePageable;
 import com.sarfaraz.management.model.User;
-import com.sarfaraz.management.model.dto.NameAndRole;
 import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
 import com.sarfaraz.management.service.ProjectService;
 import com.sarfaraz.management.service.UserService;
@@ -46,15 +45,15 @@ public class ProjectController {
 		this.userService = userService;
 	}
 
-	@GetMapping(value = { "/list", "", "/", "/all" })
-	public ResponseEntity<ResponseData> getSortedPageable(
+	@GetMapping(value = { "/list", "/all" })
+	public ResponseEntity<ResponsePageable> getSortedPageable(
 			final @RequestParam(value = "page", required = false, defaultValue = "1") int page,
 			final @RequestParam(value = "size", required = false, defaultValue = "20") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort)
 			throws JSONException {
 		Page<ProjectOnlyDTO> projects = service.sortedByField(page, size, sort);
 
-		ResponseData response = new ResponseData(projects.getTotalPages(), projects.getTotalElements(),
+		ResponsePageable response = new ResponsePageable(projects.getTotalPages(), projects.getTotalElements(),
 				projects.getSize(), projects.getNumber() + 1, projects.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -81,7 +80,7 @@ public class ProjectController {
 	}
 
 	@GetMapping(path = { "/search" })
-	public ResponseEntity<ResponseData> searchProjectByField(final @RequestParam("name") Optional<String> name,
+	public ResponseEntity<ResponsePageable> searchProjectByField(final @RequestParam("name") Optional<String> name,
 			final @RequestParam(value = "page", required = false, defaultValue = "1") int p,
 			final @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {
@@ -90,17 +89,17 @@ public class ProjectController {
 
 		log.info(page.toList().toString());
 
-		ResponseData response = new ResponseData(page.getTotalPages(), page.getTotalElements(), page.getSize(),
+		ResponsePageable response = new ResponsePageable(page.getTotalPages(), page.getTotalElements(), page.getSize(),
 				page.getNumber() + 1, page.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 //		Map<String, String> user = Map.of("name", name.orElse("Null"), "email", email.orElse("Null"));
 		// return users;
 	}
 
-	@GetMapping({ "/view" })
-	public Set<NameAndRole> getOneProjet(@RequestParam("id") Long id) {
-		return service.getAllRelatedUsers(id);
-	}
+//	@GetMapping({ "/view" })
+//	public Set<NameAndRole> getOneProjet(@RequestParam("id") Long id) {
+//		return service.getAllRelatedUsers(id);
+//	}
 
 	/*
 	 * @GetMapping({"/detail/tickets"}) public List<TicketListProjectDTO>

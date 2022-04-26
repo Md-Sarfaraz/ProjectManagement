@@ -1,5 +1,5 @@
 package com.sarfaraz.management.service;
-
+/*
 import com.sarfaraz.management.config.FileStorageProperties;
 import com.sarfaraz.management.exception.FileNotFoundException;
 import com.sarfaraz.management.exception.FileStorageException;
@@ -73,3 +73,5 @@ public class FileStorageService {
         }
     }
 }
+
+*/

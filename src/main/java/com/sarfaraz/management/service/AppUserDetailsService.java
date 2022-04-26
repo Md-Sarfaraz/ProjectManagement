@@ -1,7 +1,6 @@
 package com.sarfaraz.management.service;
 
 //import com.sarfaraz.management.model.AppUserDetails;
-import com.sarfaraz.management.model.Role;
 import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;/*
