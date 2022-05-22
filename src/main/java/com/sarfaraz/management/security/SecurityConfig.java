@@ -1,5 +1,7 @@
 package com.sarfaraz.management.security;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,19 +13,18 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
 	private final UserDetailsService userDetailsService;
 	private final PasswordConfig passwordConfig;
 	private final InvalidUserAuthEntryPoint authEntryPoint;
@@ -43,17 +44,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// JwtAuthentictionFilter authentictionFilter = new
 		// JwtAuthentictionFilter(authenticationManagerBean());
 		// authentictionFilter.setFilterProcessesUrl("/api/login");
+		http.cors().configurationSource(request -> {
+			var cors = new CorsConfiguration();
+			cors.setAllowedOrigins(List.of("*"));
+			cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+			cors.setAllowedHeaders(List.of("*"));
+			return cors;
+		});
 
+		http.csrf().disable();
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		http.authorizeRequests().antMatchers(HttpMethod.POST, "/api/login/**", "/login").permitAll();
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/index", "/home").permitAll();
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/token/refresh").permitAll();
-
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/project/**").hasAnyAuthority("ROLE_ADMIN");
+		http.authorizeRequests().antMatchers(HttpMethod.POST, JwtProperties.LOGIN_URL).permitAll();
+		http.authorizeRequests().antMatchers(HttpMethod.GET, JwtProperties.REFRESH_TOKEN_URL).permitAll();
+		http.authorizeRequests().antMatchers(HttpMethod.GET, "/index", "/home", "/api/select-properties").permitAll();
+		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/roles/**").hasAnyAuthority("ROLE_ADMIN");
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/**").authenticated();
+		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/ticket/**").hasAnyAuthority("ROLE_ADMIN",
+				"ROLE_MANAGER");
+		http.authorizeRequests().antMatchers(HttpMethod.DELETE, "/api/user/delete").hasAnyAuthority("ROLE_USER",
+				"ROLE_ADMIN");
+		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/project/**").hasAnyAuthority("ROLE_ADMIN");
 		http.authorizeRequests().anyRequest().authenticated();
-		http.csrf().disable().cors();
 		http.exceptionHandling().authenticationEntryPoint(authEntryPoint);
 
 		// http.addFilter(authentictionFilter);
@@ -64,14 +75,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		return super.authenticationManagerBean();
-	}
-
-	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
-		source.registerCorsConfiguration("/**", corsConfiguration);
-		return source;
 	}
 
 }

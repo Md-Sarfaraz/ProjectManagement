@@ -1,19 +1,12 @@
 package com.sarfaraz.management.security;
 
-import static com.sarfaraz.management.security.JwtProperties.SECRET_KEY;
 import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import com.auth0.jwt.JWT;
@@ -21,6 +14,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.sarfaraz.management.model.User;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,51 +61,25 @@ public class JwtUtility {
 		stream(roles).forEach(role -> {
 			authorities.add(new SimpleGrantedAuthority(role));
 		});
-		log.info("return Authorities : {}", authorities.toString());
 		return authorities;
 	}
 
-	public String generateToken(User user, String issuer, boolean withClaims) {
-		String token;
-		if (withClaims) {
-			token = JWT.create().withSubject(user.getUsername())
-					.withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000)).withIssuer(issuer)
-					.withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-							.collect(Collectors.toList()))
-					.sign(getAlgorithm());
-		} else {
-			token = JWT.create().withSubject(user.getUsername())
-					.withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000)).withIssuer(issuer)
-					.sign(getAlgorithm());
-		}
-
-		log.info("New Token Generated : {}", token);
+	public String generateRefreshToken(String username, String issuer) {
+		String token = JWT.create().withSubject(username)
+				.withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
+				.withIssuer(issuer).sign(getAlgorithm());
+		log.info("Refresh Token Generated : {}", token);
 		return token;
 	}
 
-	public <T> String generateToken(String username, Set<String> roles, String issuer, boolean withClaims) {
-		String token;
-		if (withClaims) {
-			token = JWT.create().withSubject(username).withExpiresAt(getForwardTime(15)).withIssuer(issuer)
-					.withClaim("roles", new ArrayList<>().addAll(roles)).sign(getAlgorithm());
-		} else {
-			token = JWT.create().withSubject(username).withExpiresAt(getForwardDays(90)).withIssuer(issuer)
-					.sign(getAlgorithm());
-		}
-
-		log.info("New Token Generated : {}", token);
-		log.info("secret : {}", SECRET_KEY);
+	public String generateAccessToken(User user, String issuer) {
+		String token = JWT.create().withSubject(user.getUsername())
+				.withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
+				.withIssuer(issuer).withClaim("roles", new ArrayList<>(user.getRoles()))
+				.withClaim("email", user.getEmail()).withClaim("name", user.getName()).withClaim("id", user.getId())
+				.sign(getAlgorithm());
+		log.info("Access Token Generated : {}", token);
 		return token;
-	}
-
-	public Date getForwardTime(int minute) {
-		Date date = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(minute));
-		return date;
-	}
-
-	public Date getForwardDays(int days) {
-		Date date = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMicros(days));
-		return date;
 	}
 
 }

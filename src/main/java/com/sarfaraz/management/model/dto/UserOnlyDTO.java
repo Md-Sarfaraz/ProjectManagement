@@ -1,6 +1,7 @@
 package com.sarfaraz.management.model.dto;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -22,6 +23,8 @@ public interface UserOnlyDTO {
 	String getMobile();
 
 	String getAddress();
+
+	Set<String> getRoles();
 
 	boolean getActive();
 

@@ -1,12 +1,9 @@
 package com.sarfaraz.management.controller;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -27,21 +24,18 @@ import com.sarfaraz.management.model.dto.UserAllInfo;
 import com.sarfaraz.management.model.dto.UserOnlyDTO;
 import com.sarfaraz.management.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping(value = { "/api/user" })
 public class UserController {
 	private final UserService userService;
-	private final Logger log = LoggerFactory.getLogger(UserController.class);
 
 	@Autowired
 	public UserController(UserService userService) {
 		this.userService = userService;
 	}
-
-//	@GetMapping("/all/with/roles")
-//	public Set<NameAndRole> allUserWithRoles() throws JSONException {
-//		return userService.listAllWithRoles();
-//	}
 
 	@GetMapping(value = { "/list" })
 	public ResponseEntity<ResponsePageable> getSortedPageable(
@@ -50,9 +44,9 @@ public class UserController {
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort)
 			throws JSONException {
 		Page<UserOnlyDTO> users = userService.sortedByfield(page, size, sort);
-
-		ResponsePageable response = new ResponsePageable(users.getTotalPages(), users.getTotalElements(), users.getSize(),
-				users.getNumber() + 1, users.toList());
+		
+		ResponsePageable response = new ResponsePageable(users.getTotalPages(), users.getTotalElements(),
+				users.getSize(), users.getNumber() + 1, users.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
@@ -80,8 +74,8 @@ public class UserController {
 
 		log.info(users.toList().toString());
 
-		ResponsePageable response = new ResponsePageable(users.getTotalPages(), users.getTotalElements(), users.getSize(),
-				users.getNumber() + 1, users.toList());
+		ResponsePageable response = new ResponsePageable(users.getTotalPages(), users.getTotalElements(),
+				users.getSize(), users.getNumber() + 1, users.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 //		Map<String, String> user = Map.of("name", name.orElse("Null"), "email", email.orElse("Null"));
 		// return users;
@@ -119,7 +113,7 @@ public class UserController {
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
-	@CrossOrigin
+
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public ResponseEntity<Map<String, Boolean>> deleteUser(@RequestParam("uid") Long uid) {
 		try {
@@ -131,9 +125,12 @@ public class UserController {
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
-	@GetMapping(value = { "/all/users/roles" })
-	public List<User> getAllWithroles() {
-		return userService.listAll();
+	@RequestMapping(value = { "/roles/update" }, method = RequestMethod.POST, consumes = "application/json")
+	public boolean updateRoles(@RequestBody User user) throws Exception {
+		boolean result = userService.updateRole(user.getId(), user.getRoles());
+		log.info(user.toString());
+		log.info("result : {}",result);
+		return result;
 	}
 
 //	@RequestMapping(value = "/roles", method = RequestMethod.POST)

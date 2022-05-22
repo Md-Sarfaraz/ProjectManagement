@@ -21,8 +21,13 @@ import javax.validation.constraints.NotBlank;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Data;
+import lombok.ToString;
 
 @Entity
+@Data
 @Table(name = "projects")
 public class Project {
 
@@ -45,9 +50,13 @@ public class Project {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate updated;
 	private String status;
+
+	@ToString.Exclude
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "projects")
 	private Set<User> users = new HashSet<>();
 
+	@ToString.Exclude
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.REMOVE)
 	private Set<Ticket> tickets = new HashSet<>();
 
@@ -63,79 +72,9 @@ public class Project {
 		this.id = id;
 	}
 
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public LocalDate getCreated() {
-		return created;
-	}
-
-	public void setCreated(LocalDate created) {
-
-		this.created = created;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDetail() {
-		return detail;
-	}
-
-	public void setDetail(String detail) {
-		this.detail = detail;
-	}
-
-	public LocalDate getLastDate() {
-		return lastDate;
-	}
-
-	public void setLastDate(LocalDate lastDate) {
-		this.lastDate = lastDate;
-	}
-
-	public LocalDate getUpdated() {
-		return updated;
-	}
-
-	public void setUpdated(LocalDate updated) {
-		this.updated = updated;
-	}
-
-	public Set<User> getUsers() {
-		return users;
-	}
-
-	public void setUsers(Set<User> users) {
-		this.users = users;
-	}
-
 	public void addUser(User user) {
 		user.addProject(this);
 		this.users.add(user);
 	}
 
-	@Override
-	public String toString() {
-		return "Project{" + "id=" + id + ", name='" + name + '\'' + ", detail='" + detail + '\'' + ", lastDate="
-				+ lastDate + ", created=" + created + ", updated=" + updated + ", status='" + status + '\'' + "}";
-	}
 }

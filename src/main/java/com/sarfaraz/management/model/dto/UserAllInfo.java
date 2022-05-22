@@ -29,15 +29,7 @@ public interface UserAllInfo {
 
 	Set<Project> getProjects();
 
-	Set<Role> getRoles();
-
-	interface Role {
-		long getId();
-
-		String getName();
-
-		String getDetail();
-	}
+	Set<String> getRoles();
 
 	interface Project {
 		Long getId();

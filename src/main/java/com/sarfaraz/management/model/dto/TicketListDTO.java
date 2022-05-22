@@ -22,7 +22,7 @@ public interface TicketListDTO {
 	// @JsonFormat(pattern = "yyyy-MM-dd")
 	// @Convert(converter = LocalDateAttributeConverter.class)
 	@Value("#{target.lastDate.toString()}")
-	String getLasDate();
+	String getLastDate();
 
 	String getStatus();
 

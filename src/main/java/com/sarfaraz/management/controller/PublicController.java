@@ -7,28 +7,42 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONObject;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sarfaraz.management.exception.CredentialsException;
 import com.sarfaraz.management.exception.UserNotFoundException;
 import com.sarfaraz.management.model.AuthUser;
+import com.sarfaraz.management.model.Project;
 import com.sarfaraz.management.model.User;
+import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
+import com.sarfaraz.management.model.dto.TicketListDTO;
+import com.sarfaraz.management.model.dto.TotalCounts;
+import com.sarfaraz.management.repository.ProjectRepo.Status;
+import com.sarfaraz.management.repository.UserRepo.Roles;
+import com.sarfaraz.management.security.JwtProperties;
 import com.sarfaraz.management.security.JwtUtility;
+import com.sarfaraz.management.service.ProjectService;
+import com.sarfaraz.management.service.TicketService;
 import com.sarfaraz.management.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -41,51 +55,100 @@ import lombok.extern.slf4j.Slf4j;
 public class PublicController {
 
 	private final JwtUtility utility;
-	private final UserService userService;
 	private final AuthenticationManager authenticationManager;
+	private final UserService userService;
+	private final ProjectService projectService;
+	private final TicketService ticketService;
+
+	private String getTopLevelRole(Set<String> roles) {
+		if (roles.contains(Roles.ROLE_ADMIN.toString()))
+			return Roles.ROLE_ADMIN.toString();
+		if (roles.contains(Roles.ROLE_MANAGER.toString()))
+			return Roles.ROLE_MANAGER.toString();
+		if (roles.contains(Roles.ROLE_TESTER.toString()))
+			return Roles.ROLE_TESTER.toString();
+		if (roles.contains(Roles.ROLE_DEVELOPER.toString()))
+			return Roles.ROLE_DEVELOPER.toString();
+		if (roles.contains(Roles.ROLE_PUBLIC.toString()))
+			return Roles.ROLE_PUBLIC.toString();
+
+		return "NO_ROLE";
+	}
 
 	@RequestMapping(value = { "/", "", "/index", "/home" })
-	private Map<String, Object> index() {
-		return Map.of("status", true, "page", "Home Page");
+	private Map<String, Object> index(@RequestParam(required = false) long id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("page", "Home Page");
+		map.put("status", true);
+		if (id > 0) {
+
+		}
+		return map;
 	}
 
-	@RequestMapping(value = { "/api/login" }, method = RequestMethod.POST, consumes = "application/json")
-	private ResponseEntity<Map<String, Object>> userLogin(@RequestBody AuthUser authUser, HttpServletRequest request)
-			throws UserNotFoundException {
-		// TODO throws global error
-		Optional<User> opt = userService.findByUsername(authUser.getUsername());
-		log.warn("User : {}", opt.get());
-		opt.orElseThrow(() -> new UserNotFoundException("No User found with username : " + authUser.getUsername()));
-		authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword()));
-		String token = utility.generateToken(authUser.getUsername(), opt.get().getRoles(), request.getServletPath(),
-				true);
+	@RequestMapping(value = { "/api/select-properties" }, method = RequestMethod.GET)
+	private ResponseEntity<Map<String, Object>> getselectOptions() {
+		Map<String, Object> map = Map.of("userRoles", Roles.values(), "projectStatus", Status.values());
+		return ResponseEntity.ok(map);
+	}
 
-		log.warn("token : {}", token);
+	@RequestMapping(value = JwtProperties.LOGIN_URL, method = RequestMethod.POST, consumes = "application/json")
+	private ResponseEntity<Map<String, Object>> userLogin(@RequestBody AuthUser authUser, HttpServletRequest request)
+			throws CredentialsException {
+
 		Map<String, Object> res = new HashMap<>();
 
-		return ResponseEntity.ok(res);
+		Optional<User> opt = userService.findByUsername(authUser.getUsername());
+		opt.orElseThrow(() -> new CredentialsException("Wrong Username : " + authUser.getUsername()));
 
+		opt.ifPresentOrElse(user -> {
+			authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword()));
+			String accessToken = utility.generateAccessToken(opt.get(), request.getServletPath());
+			String refreshToken = utility.generateRefreshToken(authUser.getUsername(), request.getServletPath());
+			res.put("token", Map.of("accessToken", accessToken, "refreshToken", refreshToken));
+			log.warn("UserLog : {}", user);
+			res.put("user", user);
+		}, () -> {
+			log.warn("Username Not Found log: {}", authUser.getUsername());
+		});
+
+		Set<ProjectOnlyDTO> projects = projectService.getAllProjectsByUserId(opt.get().getId());
+		Set<TicketListDTO> tickets = ticketService.findAllByUserId(opt.get().getId());
+		TotalCounts counts = projectService.totalCounts();
+
+		res.put("relatedProjects", projects);
+		res.put("relatedTicket", tickets);
+		res.put("TotalRelatedProject", projects.size());
+		res.put("totalRelatedTicket", tickets.size());
+
+		res.put("totalProject", counts.getProjectsCount());
+		res.put("totalTicket", counts.getTicketsCount());
+		res.put("totalUsers", counts.getUsersCount());
+
+		res.put("topLevelRole", getTopLevelRole(opt.get().getRoles()));
+
+		return ResponseEntity.ok(res);
 	}
 
-	@GetMapping("/api/token/refresh")
+	@GetMapping(value = JwtProperties.REFRESH_TOKEN_URL)
 	private void refreshToke(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
 		String authHeader = request.getHeader(AUTHORIZATION);
 		if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
+			response.setContentType(APPLICATION_JSON_VALUE);
 			try {
 				String refresh_token = authHeader.substring("Bearer ".length());
 				String username = utility.getSubject(refresh_token);
 				Optional<User> opt = userService.findByUsername(username);
 				User user = opt.orElseThrow(() -> new RuntimeException("User Not Found with username : " + username));
-				String access_token = utility.generateToken(user.getUsername(), user.getRoles(),
-						request.getRequestURL().toString(), true);
+				String access_token = utility.generateAccessToken(user, request.getRequestURL().toString());
 
-				response.setHeader("access_tokec", access_token);
+				response.setHeader("access_token", access_token);
 				response.setHeader("refresh_token", refresh_token);
 				Map<String, String> tokens = new HashMap<>();
-				tokens.put("access_token", access_token);
-				tokens.put("refresh_token", refresh_token);
-				response.setContentType(APPLICATION_JSON_VALUE);
+				tokens.put("accessToken", access_token);
+				tokens.put("refreshToken", refresh_token);
 				log.info("Return New Access Token with Same Refresh Token : {}", tokens.toString());
 				new ObjectMapper().writeValue(response.getOutputStream(), tokens);
 
@@ -95,7 +158,7 @@ public class PublicController {
 				response.setStatus(FORBIDDEN.value());
 				Map<String, String> error = new HashMap<>();
 				error.put("error_message", e.getMessage());
-				response.setContentType(APPLICATION_JSON_VALUE);
+
 				new ObjectMapper().writeValue(response.getOutputStream(), error);
 			}
 

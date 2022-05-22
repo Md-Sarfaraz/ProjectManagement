@@ -37,11 +37,6 @@ public class User {
 	private String address;
 	private boolean active;
 
-//	@JsonIgnore
-//	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
-//	@JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
-//	private Set<Role> roles = new HashSet<>();
-
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "roles", joinColumns = @JoinColumn(name = "id", referencedColumnName = "id"))
 	@Column(name = "role")
@@ -71,6 +66,10 @@ public class User {
 
 	public void addRole(String role) {
 		this.roles.add(role);
+	}
+
+	public void removeRole(String role) {
+		this.roles.remove(role);
 	}
 
 	public void addProject(Project p) {

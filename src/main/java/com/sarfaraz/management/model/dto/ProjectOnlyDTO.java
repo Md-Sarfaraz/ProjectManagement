@@ -1,13 +1,13 @@
 package com.sarfaraz.management.model.dto;
 
 import java.time.LocalDate;
-
+import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 public interface ProjectOnlyDTO {
 
 	Long getId();
-
+	
 	String getName();
 
 	String getDetail();
@@ -22,5 +22,5 @@ public interface ProjectOnlyDTO {
 	LocalDate getUpdated();
 
 	String getStatus();
-
+	
 }

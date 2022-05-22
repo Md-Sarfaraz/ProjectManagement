@@ -1,5 +1,7 @@
 package com.sarfaraz.management.controller;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -49,9 +51,10 @@ public class ProjectController {
 	public ResponseEntity<ResponsePageable> getSortedPageable(
 			final @RequestParam(value = "page", required = false, defaultValue = "1") int page,
 			final @RequestParam(value = "size", required = false, defaultValue = "20") int size,
-			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort)
+			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort,
+			final @RequestParam(value = "order", required = false, defaultValue = "true") boolean order)
 			throws JSONException {
-		Page<ProjectOnlyDTO> projects = service.sortedByField(page, size, sort);
+		Page<ProjectOnlyDTO> projects = service.getAllSortedByFields(page, size, sort, order);
 
 		ResponsePageable response = new ResponsePageable(projects.getTotalPages(), projects.getTotalElements(),
 				projects.getSize(), projects.getNumber() + 1, projects.toList());
@@ -59,14 +62,12 @@ public class ProjectController {
 	}
 
 	@RequestMapping(value = { "/save", "/update" }, method = RequestMethod.POST, consumes = "application/json")
-	public ResponseEntity<Map<String, Long>> addProject(@RequestBody Project project, HttpServletRequest request) {
-		long savedId = service.save(project);
+	public ResponseEntity addProject(@RequestBody Project project, HttpServletRequest request) {
+		boolean savedId = service.save(project);
 		log.info(project.toString());
-		Map<String, Long> res = Map.of("id", savedId);
-		return new ResponseEntity<>(res, HttpStatus.OK);
+		return ResponseEntity.ok(Map.of("saved", savedId));
 	}
 
-	@CrossOrigin
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public ResponseEntity<Map<String, Boolean>> deleteProject(@RequestParam("id") long pid) {
 		boolean status = false;
@@ -80,12 +81,13 @@ public class ProjectController {
 	}
 
 	@GetMapping(path = { "/search" })
-	public ResponseEntity<ResponsePageable> searchProjectByField(final @RequestParam("name") Optional<String> name,
-			final @RequestParam(value = "page", required = false, defaultValue = "1") int p,
-			final @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+	public ResponseEntity<ResponsePageable> searchProjectByField(final @RequestParam("q") Optional<String> name,
+			final @RequestParam(value = "p", required = false, defaultValue = "1") int p,
+			final @RequestParam(value = "s", required = false, defaultValue = "10") int size,
+			final @RequestParam(value = "order", required = false, defaultValue = "10") int order,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {
 
-		Page<ProjectOnlyDTO> page = service.searchByField(name.get(), p, size, sort);
+		Page<ProjectOnlyDTO> page = service.searchByField(name.get(), p, size, sort, true);
 
 		log.info(page.toList().toString());
 
@@ -108,9 +110,10 @@ public class ProjectController {
 	 * ticketService.getAllTicketsRelatedToProject(id); }
 	 */
 
-	@GetMapping({ "/users/all", "/users", "/users/list" })
-	public Set<User> listAllUsers(@RequestParam Long pid) {
+	@GetMapping({ "/users/list" })
+	public Set<User> listRelatedUser(@RequestParam("id") Long pid) {
 		Set<User> users = service.getAllUserByProjectID(pid);
+
 		return users;
 	}
 

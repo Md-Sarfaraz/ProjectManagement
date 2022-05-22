@@ -25,7 +25,7 @@ public class ErrorDetail {
 		this.status = status;
 	}
 
-	public ErrorDetail(String message, String error, int status, String path) {
+	public ErrorDetail(String error,String message,  int status, String path) {
 		this.timestamp = new Date();
 		this.message = message;
 		this.error = error;

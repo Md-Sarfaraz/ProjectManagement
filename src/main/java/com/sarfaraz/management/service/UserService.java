@@ -1,12 +1,14 @@
 package com.sarfaraz.management.service;
 
 import com.sarfaraz.management.exception.DatabaseUpdateException;
+import com.sarfaraz.management.exception.UserInputException;
 import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.OnlyNameAndEmail;
 import com.sarfaraz.management.model.dto.UserAllInfo;
 import com.sarfaraz.management.model.dto.UserOnlyDTO;
 import com.sarfaraz.management.repository.UserRepo;
 import com.sarfaraz.management.repository.UserRepo.Roles;
+import static com.sarfaraz.management.repository.UserRepo.Roles.ROLE_PUBLIC;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,6 +30,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,6 +70,9 @@ public class UserService implements UserDetailsService {
 	public long save(User user) {
 		// user.setPassword(encoder.encode(user.getPassword()));
 		if (user.getRoles().isEmpty()) {
+			user.addRole(Roles.ROLE_PUBLIC.name());
+		}
+		if (!user.getRoles().contains(ROLE_PUBLIC.toString())) {
 			user.addRole(Roles.ROLE_PUBLIC.name());
 		}
 		User u = userRepo.save(user);
@@ -118,7 +125,6 @@ public class UserService implements UserDetailsService {
 		log.info(String.format("User with ID : %s deleted successfully.", id));
 	}
 
-	
 	public Optional<User> findByUsername(String username) {
 		return userRepo.findByUsername(username);
 	}
@@ -132,12 +138,24 @@ public class UserService implements UserDetailsService {
 		return userRepo.findByEmail(email);
 	}
 
-	public void updateRole(long id, Set<String> roles) {
+	@Modifying
+	public boolean updateRole(long id, Set<String> roles) throws UserInputException {
+		Set<String> ur = new HashSet<>();
+		try {
+			roles.forEach(r -> ur.add(Roles.valueOf(r).name()));
+		} catch (IllegalArgumentException e) {
+			throw new UserInputException("Wrong Role(s) Name");
+		}
 		Optional<User> opt = userRepo.findById(id);
-		opt.ifPresent(user -> {
-			user.getRoles().addAll(roles);
+		if (opt.isEmpty()) {
+			return false;
+		} else {
+			User user = opt.get();
+			user.getRoles().addAll(ur);
 			userRepo.save(user);
-		});
+			log.info("User Role Updated : {}", user.getRoles());
+			return true;
+		}
 	}
 
 	public boolean addRole(long id, String role) {
@@ -145,8 +163,11 @@ public class UserService implements UserDetailsService {
 		if (opt.isEmpty())
 			return false;
 		opt.ifPresent(user -> {
-			user.getRoles().add(role);
-			userRepo.save(user);
+			String r = Roles.valueOf(role).name();
+
+			user.addRole(role);
+			log.info(user.toString());
+			// userRepo.save(user);
 		});
 		return true;
 	}
@@ -156,7 +177,7 @@ public class UserService implements UserDetailsService {
 		if (opt.isEmpty())
 			return false;
 		opt.ifPresent(user -> {
-			user.getRoles().remove(role);
+			user.removeRole(role);
 			userRepo.save(user);
 		});
 		return true;

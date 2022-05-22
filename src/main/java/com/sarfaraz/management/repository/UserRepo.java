@@ -23,7 +23,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
 	@Query(value = "select u from User u left join fetch u.roles where u.username=:username")
 	Optional<User> findByUsername(@Param("username") String username);
-	// Optional<User> findByUsername(String username);
 
 	@Query(value = "select u from User u where lower(concat(u.name, u.email, u.mobile, u.username)) like lower(concat('%',?1,'%'))")
 	Page<User> findByName(String name, Pageable pageable);
@@ -32,10 +31,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
 	Optional<User> findByEmail(@Param("email") String email);
 
 	Optional<User> findByNameAndEmail(String name, String email);
-
-//	@Query(value = "select distinct new com.sarfaraz.management.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) "
-//			+ "from User u left join u.roles r")
-//	Set<NameAndRole> getAllWithRoles();
 
 	@Modifying
 	@Query("update User u set u.password = :password where u.id = :id")
@@ -63,15 +58,12 @@ public interface UserRepo extends JpaRepository<User, Long> {
 //			+ "from User u left join u.roles r join u.projects p where p.id=:pid")
 //	Set<NameAndRole> getAllRelated(@Param("pid") Long id);
 
-	@Query(value = "select distinct  u.id as id, u.name as name, u.email as email, r as roles from User u left join  u.roles r join u.projects p where p.id=:pid")
-	List<Object[]> findor(@Param("pid") Long pid);
-
 	enum Roles {
 		ROLE_ADMIN("Admin can access to all EndPoints"), ROLE_MANAGER("Manager can manage users, projects and tickets"),
 		ROLE_TESTER("Tester can raise a bug or request for features, access all the tickets"
 				+ " of projects which is issued by manager"),
 		ROLE_DEVELOPER("Developer can accept and deal with tickets of the issued projects"),
-		ROLE_PUBLIC("Public can Only learn About the project and cant interact with databases");
+		ROLE_PUBLIC("Public can Only learn About the project and can't interact with databases");
 
 		private String desc;
 

@@ -1,7 +1,7 @@
 package com.sarfaraz.management.config;
 
 
-import com.sarfaraz.management.exception.UserInputError;
+import com.sarfaraz.management.exception.UserInputException;
 import com.sarfaraz.management.repository.TicketRepo;
 import org.springframework.core.convert.converter.Converter;
 

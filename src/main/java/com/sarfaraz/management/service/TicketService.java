@@ -3,6 +3,7 @@ package com.sarfaraz.management.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -10,9 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.sarfaraz.management.model.Ticket;
+import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
 import com.sarfaraz.management.model.dto.TicketListDTO;
 import com.sarfaraz.management.model.dto.TicketListProjectDTO;
 import com.sarfaraz.management.repository.TicketRepo;
@@ -72,12 +78,20 @@ public class TicketService {
 	}
 
 	@Transactional
-	public List<TicketListDTO> listAll() {
-		return repo.getAllTickets();
+	public Page<TicketListDTO> listAll(int page, int size) {
+		Pageable pageable = PageRequest.of(page - 1, size, Sort.by("name"));
+		return repo.getAllTickets(pageable);
 	}
 
-	public List<TicketListDTO> getAllTicketsByProjectId(Long id) {
-		List<TicketListDTO> tickets = repo.getAllByProjectId(id);
+	public Page<TicketListDTO> getAllTicketsByProjectId(Long id, int page, int size) {
+		Pageable pageable = PageRequest.of(page - 1, size, Sort.by("name"));
+		Page<TicketListDTO> tickets = repo.getAllByProjectId(id, pageable);
+		log.info(tickets.toString());
+		return tickets;
+	}
+
+	public Set<TicketListDTO> findAllByUserId(Long id) {
+		Set<TicketListDTO> tickets = repo.findAllByUserId(id);
 		log.info(tickets.toString());
 		return tickets;
 	}
