@@ -119,8 +119,11 @@ public class PublicController {
 
 		res.put("relatedProjects", projects);
 		res.put("relatedTicket", tickets);
-		res.put("TotalRelatedProject", projects.size());
-		res.put("totalRelatedTicket", tickets.size());
+
+		if (projects != null)
+			res.put("TotalRelatedProject", projects.size());
+		if (tickets != null)
+			res.put("totalRelatedTicket", tickets.size());
 
 //		res.put("totalProject", counts.getProjectsCount());
 //		res.put("totalTicket", counts.getTicketsCount());

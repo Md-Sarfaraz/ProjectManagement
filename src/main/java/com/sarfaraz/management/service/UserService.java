@@ -190,8 +190,8 @@ public class UserService implements UserDetailsService {
 		return userRepo.searchByName(name);
 	}
 	
-	public Set<User> getAllbyProjectId(Long projectID) {
-		return userRepo.getAllByProjectId(projectID);
+	public Set<UserOnlyDTO> getAllbyProjectId(Long projectID) {
+		return userRepo.getAllUserByProjectId(projectID);
 	}
 	
 		public UserAllInfo getAllwithprojectandroles(Long uid) {

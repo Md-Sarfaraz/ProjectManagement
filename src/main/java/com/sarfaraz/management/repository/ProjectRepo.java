@@ -21,42 +21,22 @@ import com.sarfaraz.management.model.dto.TotalCounts;
 @Repository
 public interface ProjectRepo extends JpaRepository<Project, Long> {
 
-
-
-	@Modifying
-	@Query(value = "update Project p  set p.users=null where p.id=:pid")
-	int addUserToProject(Long pid);
-
-	@Query(value = "select p from Project p")
-	List<Project> findOnlyProjects();
+	@Query(value = "select distinct p from Project p")
+	Page<ProjectOnlyDTO> findAllProjects(Pageable pageable);
 
 	@Query(value = "select distinct p from Project p where lower(p.name) like lower(concat('%',?1,'%'))")
 	Page<ProjectOnlyDTO> findByname(String name, Pageable pageable);
 
-	@Query(value = "select distinct p from Project p")
-	Page<ProjectOnlyDTO> findAllOnlyProject(Pageable pageable);
-
 	@Query(value = "select p from Project p  join p.users u where u.id=:uid")
 	List<ProjectOnlyDTO> findAllByUser(Long uid);
+
 
 	// Fetch All Project Related To User (Direct or through Tickets)
 	@Query(value = "select distinct p.id as id, p.name as name, p.detail as detail, p.lastDate as lastDate, "
 			+ "p.created as created, p.updated as updated, p.status as status"
 			+ " from Ticket t join  t.project p join p.users u where t.submitter.id=:uid or t.assignedUser.id=:uid or u.id=:uid")
-	Set<ProjectOnlyDTO> findRelatedProjects(Long uid);
+	Set<ProjectOnlyDTO> findRelatedProjects(@Param("uid") Long userID);
 
-// TODO : Get the Counts of All Tables Total Data : Not Done
-//	@Query(value = "SELECT p FROM ")
-//	TotalCounts getTotalCounts();
-
-
-
-	@Query(value = "SELECT t FROM Ticket t WHERE t.project.id=:pid")
-	List<Ticket> getUserByProject(@Param("pid") Long pid);
-//	Object[] getUserByProject(@Param("pid") Long pid);
-
-	
-	
 	enum Status {
 		DEVELOPMENT, COMPLETED, HOLD, CANCELLED, ACTIVE;
 	}

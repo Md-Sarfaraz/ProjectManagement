@@ -27,8 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sarfaraz.management.exception.UserNotFoundException;
 import com.sarfaraz.management.model.Project;
 import com.sarfaraz.management.model.ResponsePageable;
+import com.sarfaraz.management.model.Ticket;
 import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
+import com.sarfaraz.management.model.dto.UserOnlyDTO;
 import com.sarfaraz.management.service.ProjectService;
 import com.sarfaraz.management.service.UserService;
 
@@ -47,18 +49,34 @@ public class ProjectController {
 		this.userService = userService;
 	}
 
-	@GetMapping(value = { "/list"})
+	@GetMapping(value = { "/list" })
 	public ResponseEntity<ResponsePageable> getSortedPageable(
 			final @RequestParam(value = "p", required = false, defaultValue = "1") int page,
 			final @RequestParam(value = "s", required = false, defaultValue = "20") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort,
 			final @RequestParam(value = "asc", required = false, defaultValue = "true") boolean order)
 			throws JSONException {
-		Page<Project> projects = service.listAllSorted(page, size, sort, order);
+		Page<ProjectOnlyDTO> projects = service.listAllSorted(page, size, sort, order);
 
 		ResponsePageable response = new ResponsePageable(projects.getTotalPages(), projects.getTotalElements(),
 				projects.getSize(), projects.getNumber() + 1, projects.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@GetMapping(path = { "/search" })
+	public ResponseEntity<ResponsePageable> searchProjectByField(final @RequestParam("q") Optional<String> name,
+			final @RequestParam(value = "p", required = false, defaultValue = "1") int p,
+			final @RequestParam(value = "s", required = false, defaultValue = "10") int size,
+			final @RequestParam(value = "asc", required = false, defaultValue = "true") boolean order,
+			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {
+
+		Page<ProjectOnlyDTO> page = service.search(name.get(), p, size, sort, true);
+		log.info(page.toList().toString());
+		ResponsePageable response = new ResponsePageable(page.getTotalPages(), page.getTotalElements(), page.getSize(),
+				page.getNumber() + 1, page.toList());
+		return new ResponseEntity<>(response, HttpStatus.OK);
+//		Map<String, String> user = Map.of("name", name.orElse("Null"), "email", email.orElse("Null"));
+		// return users;
 	}
 
 	@RequestMapping(value = { "/save", "/update" }, method = RequestMethod.POST, consumes = "application/json")
@@ -80,48 +98,25 @@ public class ProjectController {
 		return new ResponseEntity<>(Map.of("status", status), HttpStatus.OK);
 	}
 
-	@GetMapping(path = { "/search" })
-	public ResponseEntity<ResponsePageable> searchProjectByField(final @RequestParam("q") Optional<String> name,
-			final @RequestParam(value = "p", required = false, defaultValue = "1") int p,
-			final @RequestParam(value = "s", required = false, defaultValue = "10") int size,
-			final @RequestParam(value = "order", required = false, defaultValue = "10") int order,
-			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {
-
-		Page<ProjectOnlyDTO> page = service.search(name.get(), p, size, sort, true);
-
-		log.info(page.toList().toString());
-
-		ResponsePageable response = new ResponsePageable(page.getTotalPages(), page.getTotalElements(), page.getSize(),
-				page.getNumber() + 1, page.toList());
-		return new ResponseEntity<>(response, HttpStatus.OK);
-//		Map<String, String> user = Map.of("name", name.orElse("Null"), "email", email.orElse("Null"));
-		// return users;
+	@GetMapping({ "/tickets" })
+	public List<Ticket> getTickets(@RequestParam("id") Long id) {
+		log.info("return from detail/tickets");
+//		return ticketService.getAllTicketsRelatedToProject(id);
+		return null;
 	}
 
-//	@GetMapping({ "/view" })
-//	public Set<NameAndRole> getOneProjet(@RequestParam("id") Long id) {
-//		return service.getAllRelatedUsers(id);
-//	}
-
-	/*
-	 * @GetMapping({"/detail/tickets"}) public List<TicketListProjectDTO>
-	 * getTickets(@RequestParam("id") Long id) {
-	 * log.info("return from detail/tickets"); return
-	 * ticketService.getAllTicketsRelatedToProject(id); }
-	 */
-
 	@GetMapping({ "/users/list" })
-	public Set<User> listRelatedUser(@RequestParam("id") Long pid) {
-		Set<User> users = userService.getAllbyProjectId(pid);
-
+	public Set<UserOnlyDTO> listRelatedUser(@RequestParam("id") Long pid) {
+		Set<UserOnlyDTO> users = userService.getAllbyProjectId(pid);
+		log.info("Related User {}", users.size());
 		return users;
 	}
 
 	@CrossOrigin
 	@RequestMapping(value = { "/users/add" }, method = RequestMethod.POST, consumes = "application/json")
-	public ResponseEntity<String> addUsertoProject(@RequestBody Map<String, Long> json) {
-		service.addUserToProject(json.get("pid"), json.get("uid"));
-		return new ResponseEntity<>(HttpStatus.CREATED);
+	public ResponseEntity<Map> addUsertoProject(@RequestBody Map<String, Long> json) {
+		boolean status = service.addUserToProject(json.get("pid"), json.get("uid"));
+		return ResponseEntity.ok(Map.of("added", status));
 	}
 
 	@PostMapping({ "/users/delete" })

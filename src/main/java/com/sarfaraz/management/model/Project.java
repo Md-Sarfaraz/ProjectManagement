@@ -77,4 +77,8 @@ public class Project {
 		this.users.add(user);
 	}
 
+	public void removeUser(User user) {
+		this.users.remove(user);
+	}
+
 }

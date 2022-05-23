@@ -15,8 +15,6 @@ public interface UserOnlyDTO {
 
 	String getUsername();
 
-	String getPassword();
-
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	LocalDate getDob();
 
@@ -25,7 +23,5 @@ public interface UserOnlyDTO {
 	String getAddress();
 
 	Set<String> getRoles();
-
-	boolean getActive();
 
 }

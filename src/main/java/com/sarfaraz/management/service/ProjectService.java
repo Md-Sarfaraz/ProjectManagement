@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.sarfaraz.management.model.Project;
+import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
 import com.sarfaraz.management.repository.ProjectRepo;
 
@@ -28,15 +29,15 @@ public class ProjectService {
 
 	private final ProjectRepo repo;
 
-	public Page<Project> listAllSorted(int page, int size, String sortField, boolean ascending) {
-		Pageable pageable = PageRequest.of(page, size,
+	public Page<ProjectOnlyDTO> listAllSorted(int page, int size, String sortField, boolean ascending) {
+		Pageable pageable = PageRequest.of(page - 1, size,
 				ascending ? Sort.by(sortField).ascending() : Sort.by(sortField).descending());
-		Page<Project> projects = repo.findAll(pageable);
+		Page<ProjectOnlyDTO> projects = repo.findAllProjects(pageable);
 		return projects;
 	}
 
 	public Page<ProjectOnlyDTO> search(String query, int page, int size, String sortField, boolean ascending) {
-		Pageable pageable = PageRequest.of(page, size,
+		Pageable pageable = PageRequest.of(page - 1, size,
 				ascending ? Sort.by(sortField).ascending() : Sort.by(sortField).descending());
 		Page<ProjectOnlyDTO> projects = repo.findByname(query, pageable);
 		return projects;
@@ -53,10 +54,10 @@ public class ProjectService {
 	public boolean save(Project project) {
 		if (project.getId() == null) {
 			project.setCreated(LocalDate.now());
-			log.info(project.toString());
-		}
-		if (!(project.getId() == null || project.getId() == 0))
+		} else {
 			project.setUpdated(LocalDate.now());
+		}
+		log.info(project.toString());
 		Project p = repo.save(project);
 		return p.getId() == project.getId();
 	}
@@ -76,18 +77,26 @@ public class ProjectService {
 	}
 
 	public Set<ProjectOnlyDTO> getAllProjectsByUserId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		Set<ProjectOnlyDTO> projects = repo.findRelatedProjects(id);
+		return projects;
 	}
 
-	public boolean addUserToProject(Long projectId, Long userID) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean addUserToProject(Long projectId, Long userId) {
+		Optional<Project> opt = repo.findById(projectId);
+		if (opt.isEmpty())
+			return false;
+		Project project = opt.get();
+		project.addUser(new User(userId));
+		return repo.save(project).getId() == projectId;
 	}
 
-	public boolean removeUserFromProject(Long projectId, Long userID) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean removeUserFromProject(Long projectId, Long userId) {
+		Optional<Project> opt = repo.findById(projectId);
+		if (opt.isEmpty())
+			return false;
+		Project project = opt.get();
+		project.removeUser(new User(userId));
+		return repo.save(project).getId() == projectId;
 	}
 
 }
