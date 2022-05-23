@@ -189,12 +189,12 @@ public class UserService implements UserDetailsService {
 			return new ArrayList<>();
 		return userRepo.searchByName(name);
 	}
-
-	public List<User> getAllbyProjectID(Long projectID) {
-		return userRepo.getAllByProjectID(projectID);
+	
+	public Set<User> getAllbyProjectId(Long projectID) {
+		return userRepo.getAllByProjectId(projectID);
 	}
-
-	public UserAllInfo getAllwithprojectandroles(Long uid) {
+	
+		public UserAllInfo getAllwithprojectandroles(Long uid) {
 		return userRepo.getOneWithProjectAndRole(uid);
 	}
 

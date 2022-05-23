@@ -21,6 +21,10 @@ import java.util.Set;
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
 
+	@Query(value = "select u from Project p join p.users u where p.id=:pid")
+	Set<User> getAllUserByProjectId(@Param("pid") Long pid);
+	////////////////////////////////////////////
+
 	@Query(value = "select u from User u left join fetch u.roles where u.username=:username")
 	Optional<User> findByUsername(@Param("username") String username);
 
@@ -42,8 +46,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
 	@Query(value = "select u.id as id, u.name as name, u.email as email from User u")
 	List<OnlyNameAndEmail> getOnlyNameAndEmail();
 
-	@Query(value = "select u from User u join fetch u.roles r join u.projects p where p.id=:pid")
-	List<User> getAllByProjectID(@Param("pid") Long id);
+	@Query(value = "select distinct u from User u join fetch u.roles r join u.projects p where p.id=:pid")
+	Set<User> getAllByProjectId(@Param("pid") Long id);
 
 	@Query(value = "select distinct u"
 			+ " from User u left join fetch u.roles r left join fetch u.projects p where u.id=:uid")

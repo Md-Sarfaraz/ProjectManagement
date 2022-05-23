@@ -21,9 +21,7 @@ import com.sarfaraz.management.model.dto.TotalCounts;
 @Repository
 public interface ProjectRepo extends JpaRepository<Project, Long> {
 
-	enum Status {
-		DEVELOPMENT, COMPLETED, HOLD, CANCELLED, ACTIVE;
-	}
+
 
 	@Modifying
 	@Query(value = "update Project p  set p.users=null where p.id=:pid")
@@ -51,11 +49,15 @@ public interface ProjectRepo extends JpaRepository<Project, Long> {
 //	@Query(value = "SELECT p FROM ")
 //	TotalCounts getTotalCounts();
 
-	@Query(value = "select u from Project p join p.users u where p.id=:pid")
-	Set<User> getAllUserByProjectID(@Param("pid") Long pid);
+
 
 	@Query(value = "SELECT t FROM Ticket t WHERE t.project.id=:pid")
 	List<Ticket> getUserByProject(@Param("pid") Long pid);
 //	Object[] getUserByProject(@Param("pid") Long pid);
 
+	
+	
+	enum Status {
+		DEVELOPMENT, COMPLETED, HOLD, CANCELLED, ACTIVE;
+	}
 }

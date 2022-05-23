@@ -47,14 +47,14 @@ public class ProjectController {
 		this.userService = userService;
 	}
 
-	@GetMapping(value = { "/list", "/all" })
+	@GetMapping(value = { "/list"})
 	public ResponseEntity<ResponsePageable> getSortedPageable(
-			final @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-			final @RequestParam(value = "size", required = false, defaultValue = "20") int size,
+			final @RequestParam(value = "p", required = false, defaultValue = "1") int page,
+			final @RequestParam(value = "s", required = false, defaultValue = "20") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort,
-			final @RequestParam(value = "order", required = false, defaultValue = "true") boolean order)
+			final @RequestParam(value = "asc", required = false, defaultValue = "true") boolean order)
 			throws JSONException {
-		Page<ProjectOnlyDTO> projects = service.getAllSortedByFields(page, size, sort, order);
+		Page<Project> projects = service.listAllSorted(page, size, sort, order);
 
 		ResponsePageable response = new ResponsePageable(projects.getTotalPages(), projects.getTotalElements(),
 				projects.getSize(), projects.getNumber() + 1, projects.toList());
@@ -87,7 +87,7 @@ public class ProjectController {
 			final @RequestParam(value = "order", required = false, defaultValue = "10") int order,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort) {
 
-		Page<ProjectOnlyDTO> page = service.searchByField(name.get(), p, size, sort, true);
+		Page<ProjectOnlyDTO> page = service.search(name.get(), p, size, sort, true);
 
 		log.info(page.toList().toString());
 
@@ -112,7 +112,7 @@ public class ProjectController {
 
 	@GetMapping({ "/users/list" })
 	public Set<User> listRelatedUser(@RequestParam("id") Long pid) {
-		Set<User> users = service.getAllUserByProjectID(pid);
+		Set<User> users = userService.getAllbyProjectId(pid);
 
 		return users;
 	}

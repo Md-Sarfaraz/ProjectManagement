@@ -115,16 +115,16 @@ public class PublicController {
 
 		Set<ProjectOnlyDTO> projects = projectService.getAllProjectsByUserId(opt.get().getId());
 		Set<TicketListDTO> tickets = ticketService.findAllByUserId(opt.get().getId());
-		TotalCounts counts = projectService.totalCounts();
+		// TotalCounts counts = projectService.totalCount();
 
 		res.put("relatedProjects", projects);
 		res.put("relatedTicket", tickets);
 		res.put("TotalRelatedProject", projects.size());
 		res.put("totalRelatedTicket", tickets.size());
 
-		res.put("totalProject", counts.getProjectsCount());
-		res.put("totalTicket", counts.getTicketsCount());
-		res.put("totalUsers", counts.getUsersCount());
+//		res.put("totalProject", counts.getProjectsCount());
+//		res.put("totalTicket", counts.getTicketsCount());
+//		res.put("totalUsers", counts.getUsersCount());
 
 		res.put("topLevelRole", getTopLevelRole(opt.get().getRoles()));
 
