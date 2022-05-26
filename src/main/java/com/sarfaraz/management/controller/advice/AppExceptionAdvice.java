@@ -1,8 +1,5 @@
 package com.sarfaraz.management.controller.advice;
 
-import com.sarfaraz.management.exception.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,21 +7,34 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sarfaraz.management.exception.CredentialsException;
+import com.sarfaraz.management.exception.FileNotFoundException;
+import com.sarfaraz.management.exception.FileStorageException;
+import com.sarfaraz.management.exception.ResourceNotFoundException;
+import com.sarfaraz.management.exception.UserInputException;
+import com.sarfaraz.management.exception.UserNotFoundException;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @ControllerAdvice
 public class AppExceptionAdvice {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorDetail> globalException(Exception exception, WebRequest request) {
-//		if (exception.getClass().getSimpleName().equalsIgnoreCase("BadCredentialsException")) {
-//			return new ResponseEntity<>(new ErrorDetail("Wrong Password", exception.getMessage(),
-//					HttpStatus.UNAUTHORIZED.value(), request.getDescription(false)), HttpStatus.UNAUTHORIZED);
-//		}
 		ErrorDetail error = new ErrorDetail(request.getDescription(false), exception.getMessage(),
 				HttpStatus.INTERNAL_SERVER_ERROR.value());
 		log.info(exception.getClass().getSimpleName());
 		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<ErrorDetail> resourceNotFoundException(ResourceNotFoundException exception,
+			WebRequest request) {
+		ErrorDetail error = new ErrorDetail(exception.getMessage(), request.getDescription(false),
+				HttpStatus.NOT_FOUND.value());
+		log.info(" Resource :: {}", exception.getMessage());
+		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(UserNotFoundException.class)

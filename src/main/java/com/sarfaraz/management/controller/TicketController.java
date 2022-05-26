@@ -1,12 +1,8 @@
 package com.sarfaraz.management.controller;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,17 +22,16 @@ import com.sarfaraz.management.model.Ticket;
 import com.sarfaraz.management.model.dto.TicketListDTO;
 import com.sarfaraz.management.service.TicketService;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping(value = { "/api/ticket" })
 public class TicketController {
 
-	private final Logger log = LoggerFactory.getLogger(TicketController.class);
 	private final TicketService service;
-
-	@Autowired
-	public TicketController(TicketService service) {
-		this.service = service;
-	}
 
 	@GetMapping(path = { "/list" })
 	public ResponseEntity<ResponsePageable> getAllTickets(
@@ -90,8 +85,8 @@ public class TicketController {
 
 	@RequestMapping(path = { "/user/assign" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Map<String, Boolean>> assignUser(@RequestBody Map<String, Long> json) {
-		log.info(json.get("ticket_id") + " :: " + json.get("user_id"));
-		boolean result = service.AssignUser(json.get("ticket_id"), json.get("user_id"));
+		log.info(json.get("ticketId") + " :: " + json.get("userId"));
+		boolean result = service.AssignUser(json.get("ticketId"), json.get("userId"));
 		Map<String, Boolean> res = Map.of("status", result);
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}

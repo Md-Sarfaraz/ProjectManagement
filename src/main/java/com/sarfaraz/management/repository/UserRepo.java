@@ -23,7 +23,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
 	@Query(value = "select distinct u.id as id, u.name as name, u.dob as dob, "
 			+ " u.address as address, u.mobile as mobile, u.username as username, u.email as email"
-			+ " from Project p join p.users u where p.id=:pid")
+			+ " from User u join u.projects p where p.id=:pid")
 	Set<UserOnlyDTO> getAllUserByProjectId(@Param("pid") Long pid);
 	////////////////////////////////////////////
 

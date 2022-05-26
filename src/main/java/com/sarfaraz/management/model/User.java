@@ -3,6 +3,8 @@ package com.sarfaraz.management.model;
 import com.fasterxml.jackson.annotation.*;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
@@ -12,8 +14,9 @@ import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Table(name = "users")
 public class User {
 
@@ -35,7 +38,6 @@ public class User {
 	private LocalDate dob;
 	private String mobile;
 	private String address;
-	private boolean active;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "roles", joinColumns = @JoinColumn(name = "id", referencedColumnName = "id"))
@@ -74,6 +76,7 @@ public class User {
 
 	public void addProject(Project p) {
 		this.projects.add(p);
+
 	}
 
 }

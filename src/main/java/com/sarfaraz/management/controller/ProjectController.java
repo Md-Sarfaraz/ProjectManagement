@@ -115,11 +115,18 @@ public class ProjectController {
 	@CrossOrigin
 	@RequestMapping(value = { "/users/add" }, method = RequestMethod.POST, consumes = "application/json")
 	public ResponseEntity<Map> addUsertoProject(@RequestBody Map<String, Long> json) {
-		boolean status = service.addUserToProject(json.get("pid"), json.get("uid"));
+		boolean status = false;
+		try {
+
+			status = service.addUserToProject(json.get("pid"), json.get("uid"));
+			log.info("Add User : {}", status);
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
 		return ResponseEntity.ok(Map.of("added", status));
 	}
 
-	@PostMapping({ "/users/delete" })
+	@PostMapping({ "/users/remove" })
 	public ResponseEntity<String> deleteUserFromProject(@RequestBody Map<String, Long> json) {
 		service.removeUserFromProject(json.get("pid"), json.get("uid"));
 		return new ResponseEntity<>(HttpStatus.OK);

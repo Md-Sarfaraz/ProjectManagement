@@ -24,10 +24,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
+@Getter
+@Setter
 @Entity
-@Data
 @Table(name = "projects")
 public class Project {
 
@@ -72,13 +75,20 @@ public class Project {
 		this.id = id;
 	}
 
+	/**
+	 * Using @Data from lombok create stackoverflow error in many to
+	 * many(birectional) save. Use @Gettte and @Setter instead
+	 * 
+	 * @param user
+	 */
 	public void addUser(User user) {
-		user.addProject(this);
 		this.users.add(user);
+		user.getProjects().add(this);
 	}
 
 	public void removeUser(User user) {
 		this.users.remove(user);
+		user.getProjects().remove(this);
 	}
 
 }
