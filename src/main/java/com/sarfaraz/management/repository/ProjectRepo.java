@@ -30,14 +30,18 @@ public interface ProjectRepo extends JpaRepository<Project, Long> {
 	@Query(value = "select p from Project p  join p.users u where u.id=:uid")
 	List<ProjectOnlyDTO> findAllByUser(Long uid);
 
-
 	// Fetch All Project Related To User (Direct or through Tickets)
 	@Query(value = "select distinct p.id as id, p.name as name, p.detail as detail, p.lastDate as lastDate, "
 			+ "p.created as created, p.updated as updated, p.status as status"
 			+ " from Ticket t join  t.project p join p.users u where t.submitter.id=:uid or t.assignedUser.id=:uid or u.id=:uid")
 	Set<ProjectOnlyDTO> findRelatedProjects(@Param("uid") Long userID);
 
+	@Query(nativeQuery = true, value = "SELECT " + "(SELECT COUNT(*) FROM users) as usersCount,"
+			+ "(SELECT COUNT(*) FROM projects) as projectsCount,(SELECT COUNT(*) FROM tickets) as ticketsCount")
+	TotalCounts totalCounts();
+
 	enum Status {
 		DEVELOPMENT, COMPLETED, HOLD, CANCELLED, ACTIVE;
 	}
+
 }

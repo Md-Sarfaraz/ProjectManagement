@@ -37,6 +37,7 @@ import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
 import com.sarfaraz.management.model.dto.TicketListDTO;
 import com.sarfaraz.management.model.dto.TotalCounts;
+import com.sarfaraz.management.repository.ProjectRepo;
 import com.sarfaraz.management.repository.ProjectRepo.Status;
 import com.sarfaraz.management.repository.UserRepo.Roles;
 import com.sarfaraz.management.security.JwtProperties;
@@ -59,6 +60,7 @@ public class PublicController {
 	private final UserService userService;
 	private final ProjectService projectService;
 	private final TicketService ticketService;
+	private final ProjectRepo repo;
 
 	private String getTopLevelRole(Set<String> roles) {
 		if (roles.contains(Roles.ROLE_ADMIN.toString()))
@@ -76,13 +78,23 @@ public class PublicController {
 	}
 
 	@RequestMapping(value = { "/", "", "/index", "/home" })
-	private Map<String, Object> index(@RequestParam(required = false) long id) {
+	private Map<String, Object> index(@RequestParam(required = false) Long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("page", "Home Page");
-		map.put("status", true);
-		if (id > 0) {
+		try {
 
+			Object counts = repo.totalCounts();
+			log.warn("COUNTS : {}", counts);
+			map.put("cout", counts);
+
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
 		}
+//
+//		map.put("page", "Home Page");
+//		map.put("status", true);
+//		if (id > 0) {
+//
+//		}
 		return map;
 	}
 
@@ -115,7 +127,7 @@ public class PublicController {
 
 		Set<ProjectOnlyDTO> projects = projectService.getAllProjectsByUserId(opt.get().getId());
 		Set<TicketListDTO> tickets = ticketService.findAllByUserId(opt.get().getId());
-		// TotalCounts counts = projectService.totalCount();
+		TotalCounts counts = projectService.totalCounts();
 
 		res.put("relatedProjects", projects);
 		res.put("relatedTicket", tickets);
@@ -124,10 +136,9 @@ public class PublicController {
 			res.put("TotalRelatedProject", projects.size());
 		if (tickets != null)
 			res.put("totalRelatedTicket", tickets.size());
-
-//		res.put("totalProject", counts.getProjectsCount());
-//		res.put("totalTicket", counts.getTicketsCount());
-//		res.put("totalUsers", counts.getUsersCount());
+		res.put("totalProject", counts.getProjectsCount());
+		res.put("totalTicket", counts.getTicketsCount());
+		res.put("totalUsers", counts.getUsersCount());
 
 		res.put("topLevelRole", getTopLevelRole(opt.get().getRoles()));
 

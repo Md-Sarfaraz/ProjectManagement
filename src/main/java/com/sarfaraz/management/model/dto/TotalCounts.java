@@ -2,10 +2,10 @@ package com.sarfaraz.management.model.dto;
 
 public interface TotalCounts {
 
-	long getUsersCount();
+	Long getUsersCount();
 
-	long getProjectsCount();
+	Long getProjectsCount();
 
-	long getTicketsCount();
+	Long getTicketsCount();
 
 }

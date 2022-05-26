@@ -39,7 +39,7 @@ public class TicketController {
 			final @RequestParam(value = "page", required = false, defaultValue = "1") int page,
 			final @RequestParam(value = "size", required = false, defaultValue = "20") int size,
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort,
-			final @RequestParam(value = "order", required = false, defaultValue = "name") String order) {
+			final @RequestParam(value = "asc", required = false, defaultValue = "true") boolean acs) {
 		if (pid == null) {
 			Page<TicketListDTO> tickets = service.listAll(page, size);
 			log.info(String.valueOf(tickets.getTotalElements()));

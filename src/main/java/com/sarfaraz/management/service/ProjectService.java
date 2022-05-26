@@ -16,6 +16,7 @@ import com.sarfaraz.management.exception.ResourceNotFoundException;
 import com.sarfaraz.management.model.Project;
 import com.sarfaraz.management.model.User;
 import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
+import com.sarfaraz.management.model.dto.TotalCounts;
 import com.sarfaraz.management.repository.ProjectRepo;
 import com.sarfaraz.management.repository.UserRepo;
 
@@ -47,6 +48,12 @@ public class ProjectService {
 	public Page<ProjectOnlyDTO> search(String query, int page, int size, String sortField) {
 		return search(query, page, size, sortField, true);
 	}
+
+	public TotalCounts totalCounts() {
+		return repo.totalCounts();
+	}
+
+
 
 	public Optional<Project> getOne(Long id) {
 		return repo.findById(id);
