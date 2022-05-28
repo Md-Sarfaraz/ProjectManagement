@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,14 +18,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sarfaraz.management.model.selects.ProjectStatus;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,6 +30,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @Entity
+@ToString
 @Table(name = "projects")
 public class Project {
 
@@ -52,7 +52,8 @@ public class Project {
 	// @DateTimeFormat(pattern = "dd-MM-yyyy")
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate updated;
-	private String status;
+	@Enumerated(EnumType.STRING)
+	private ProjectStatus status = ProjectStatus.HOLD;
 
 	@ToString.Exclude
 	@JsonIgnore

@@ -2,12 +2,17 @@ package com.sarfaraz.management.model.dto;
 
 import java.time.LocalDate;
 import java.util.Set;
+
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sarfaraz.management.model.selects.ProjectStatus;
 
 public interface ProjectOnlyDTO {
 
 	Long getId();
-	
+
 	String getName();
 
 	String getDetail();
@@ -21,6 +26,7 @@ public interface ProjectOnlyDTO {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	LocalDate getUpdated();
 
-	String getStatus();
-	
+	@Enumerated(EnumType.STRING)
+	ProjectStatus getStatus();
+
 }

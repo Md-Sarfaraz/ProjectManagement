@@ -40,8 +40,6 @@ public interface ProjectRepo extends JpaRepository<Project, Long> {
 			+ "(SELECT COUNT(*) FROM projects) as projectsCount,(SELECT COUNT(*) FROM tickets) as ticketsCount")
 	TotalCounts totalCounts();
 
-	enum Status {
-		DEVELOPMENT, COMPLETED, HOLD, CANCELLED, ACTIVE;
-	}
+	
 
 }

@@ -48,9 +48,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
 	@Query(value = "select u.id as id, u.name as name, u.email as email from User u")
 	List<OnlyNameAndEmail> getOnlyNameAndEmail();
 
-//	@Query(value = "select u from User u join fetch u.roles r where u.projects.id=:pid")
-//	Set<User> getAllByProjectId(@Param("pid") Long id);
-
 	@Query(value = "select distinct u"
 			+ " from User u left join fetch u.roles r left join fetch u.projects p where u.id=:uid")
 	UserAllInfo getOneWithProjectAndRole(@Param("uid") Long uid);
@@ -60,26 +57,4 @@ public interface UserRepo extends JpaRepository<User, Long> {
 	@Query(value = "select distinct u from User u")
 	Page<UserOnlyDTO> findAllOnlyUser(Pageable pageable);
 
-//	@Query(value = "select distinct new com.sarfaraz.management.model.dto.NameAndRole(u.id, u.name, u.email, r.id, r.name) "
-//			+ "from User u left join u.roles r join u.projects p where p.id=:pid")
-//	Set<NameAndRole> getAllRelated(@Param("pid") Long id);
-
-	enum Roles {
-		ROLE_ADMIN("Admin can access to all EndPoints"), ROLE_MANAGER("Manager can manage users, projects and tickets"),
-		ROLE_TESTER("Tester can raise a bug or request for features, access all the tickets"
-				+ " of projects which is issued by manager"),
-		ROLE_DEVELOPER("Developer can accept and deal with tickets of the issued projects"),
-		ROLE_PUBLIC("Public can Only learn About the project and can't interact with databases");
-
-		private String desc;
-
-		Roles(String desc) {
-			this.desc = desc;
-
-		}
-
-		public String getDetails() {
-			return this.desc;
-		}
-	}
 }

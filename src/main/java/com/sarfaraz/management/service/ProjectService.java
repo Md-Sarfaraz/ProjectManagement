@@ -53,8 +53,6 @@ public class ProjectService {
 		return repo.totalCounts();
 	}
 
-
-
 	public Optional<Project> getOne(Long id) {
 		return repo.findById(id);
 	}
@@ -66,9 +64,10 @@ public class ProjectService {
 			project.setUpdated(LocalDate.now());
 		}
 		log.info(project.toString());
-
-		Project p = repo.save(project);
-		return p.getId() == project.getId();
+		log.info(project.getStatus().getSimpleName());
+//		Project p = repo.save(project);
+//		return p.getId() == project.getId();
+		return false;
 	}
 
 	public boolean update(Project project) {

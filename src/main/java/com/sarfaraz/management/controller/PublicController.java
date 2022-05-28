@@ -39,7 +39,7 @@ import com.sarfaraz.management.model.dto.TicketListDTO;
 import com.sarfaraz.management.model.dto.TotalCounts;
 import com.sarfaraz.management.repository.ProjectRepo;
 import com.sarfaraz.management.repository.ProjectRepo.Status;
-import com.sarfaraz.management.repository.UserRepo.Roles;
+import com.sarfaraz.management.model.selects.*;
 import com.sarfaraz.management.security.JwtProperties;
 import com.sarfaraz.management.security.JwtUtility;
 import com.sarfaraz.management.service.ProjectService;
@@ -51,7 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping(value = {  "/" })
+@RequestMapping(value = { "/" })
 @RequiredArgsConstructor
 public class PublicController {
 
@@ -62,22 +62,7 @@ public class PublicController {
 	private final TicketService ticketService;
 	private final ProjectRepo repo;
 
-	private String getTopLevelRole(Set<String> roles) {
-		if (roles.contains(Roles.ROLE_ADMIN.toString()))
-			return Roles.ROLE_ADMIN.toString();
-		if (roles.contains(Roles.ROLE_MANAGER.toString()))
-			return Roles.ROLE_MANAGER.toString();
-		if (roles.contains(Roles.ROLE_TESTER.toString()))
-			return Roles.ROLE_TESTER.toString();
-		if (roles.contains(Roles.ROLE_DEVELOPER.toString()))
-			return Roles.ROLE_DEVELOPER.toString();
-		if (roles.contains(Roles.ROLE_PUBLIC.toString()))
-			return Roles.ROLE_PUBLIC.toString();
-
-		return "NO_ROLE";
-	}
-
-	@RequestMapping(value = { "/", "", "/index", "/home" })
+	@RequestMapping(value = { "/index", "/home" })
 	private Map<String, Object> index(@RequestParam(required = false) Long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
@@ -89,18 +74,19 @@ public class PublicController {
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		}
-//
-//		map.put("page", "Home Page");
-//		map.put("status", true);
-//		if (id > 0) {
-//
-//		}
+
 		return map;
 	}
 
 	@RequestMapping(value = { "/api/select-properties" }, method = RequestMethod.GET)
 	private ResponseEntity<Map<String, Object>> getselectOptions() {
-		Map<String, Object> map = Map.of("userRoles", Roles.values(), "projectStatus", Status.values());
+		Map<String, Object> map = Map.of("userRoles", UserRoles.values(), "projectStatus", Status.values());
+		Map<String, Object> users = new HashMap<>();
+		Map<String, Object> tickets = new HashMap<>();
+		Map<String, Object> projects = new HashMap<>();
+		map.put("users", users);
+		map.put("tickets", tickets);
+		map.put("projects", projects);
 		return ResponseEntity.ok(map);
 	}
 
@@ -139,8 +125,6 @@ public class PublicController {
 		res.put("totalProject", counts.getProjectsCount());
 		res.put("totalTicket", counts.getTicketsCount());
 		res.put("totalUsers", counts.getUsersCount());
-
-		res.put("topLevelRole", getTopLevelRole(opt.get().getRoles()));
 
 		return ResponseEntity.ok(res);
 	}

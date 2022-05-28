@@ -1,20 +1,18 @@
 package com.sarfaraz.management.service;
 
-import com.sarfaraz.management.exception.DatabaseUpdateException;
-import com.sarfaraz.management.exception.UserInputException;
-import com.sarfaraz.management.model.User;
-import com.sarfaraz.management.model.dto.OnlyNameAndEmail;
-import com.sarfaraz.management.model.dto.UserAllInfo;
-import com.sarfaraz.management.model.dto.UserOnlyDTO;
-import com.sarfaraz.management.repository.UserRepo;
-import com.sarfaraz.management.repository.UserRepo.Roles;
-import static com.sarfaraz.management.repository.UserRepo.Roles.ROLE_PUBLIC;
+import static com.sarfaraz.management.model.selects.UserRoles.ROLE_PUBLIC;
 
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,17 +22,18 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
+import com.sarfaraz.management.exception.DatabaseUpdateException;
+import com.sarfaraz.management.exception.UserInputException;
+import com.sarfaraz.management.model.User;
+import com.sarfaraz.management.model.dto.OnlyNameAndEmail;
+import com.sarfaraz.management.model.dto.UserAllInfo;
+import com.sarfaraz.management.model.dto.UserOnlyDTO;
+import com.sarfaraz.management.model.selects.UserRoles;
+import com.sarfaraz.management.repository.UserRepo;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -70,10 +69,10 @@ public class UserService implements UserDetailsService {
 	public long save(User user) {
 		// user.setPassword(encoder.encode(user.getPassword()));
 		if (user.getRoles().isEmpty()) {
-			user.addRole(Roles.ROLE_PUBLIC.name());
+			user.addRole(ROLE_PUBLIC.name());
 		}
 		if (!user.getRoles().contains(ROLE_PUBLIC.toString())) {
-			user.addRole(Roles.ROLE_PUBLIC.name());
+			user.addRole(ROLE_PUBLIC.name());
 		}
 		User u = userRepo.save(user);
 		return u.getId();
@@ -142,7 +141,7 @@ public class UserService implements UserDetailsService {
 	public boolean updateRole(long id, Set<String> roles) throws UserInputException {
 		Set<String> ur = new HashSet<>();
 		try {
-			roles.forEach(r -> ur.add(Roles.valueOf(r).name()));
+			roles.forEach(r -> ur.add(UserRoles.valueOf(r).name()));
 		} catch (IllegalArgumentException e) {
 			throw new UserInputException("Wrong Role(s) Name");
 		}
@@ -163,7 +162,7 @@ public class UserService implements UserDetailsService {
 		if (opt.isEmpty())
 			return false;
 		opt.ifPresent(user -> {
-			String r = Roles.valueOf(role).name();
+			String r = UserRoles.valueOf(role).name();
 
 			user.addRole(role);
 			log.info(user.toString());
@@ -189,12 +188,12 @@ public class UserService implements UserDetailsService {
 			return new ArrayList<>();
 		return userRepo.searchByName(name);
 	}
-	
+
 	public Set<UserOnlyDTO> getAllbyProjectId(Long projectID) {
 		return userRepo.getAllUserByProjectId(projectID);
 	}
-	
-		public UserAllInfo getAllwithprojectandroles(Long uid) {
+
+	public UserAllInfo getAllwithprojectandroles(Long uid) {
 		return userRepo.getOneWithProjectAndRole(uid);
 	}
 
