@@ -1,7 +1,6 @@
 package com.sarfaraz.management.service;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,7 +9,6 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,13 +16,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.sarfaraz.management.model.Ticket;
-import com.sarfaraz.management.model.dto.ProjectOnlyDTO;
 import com.sarfaraz.management.model.dto.TicketListDTO;
-import com.sarfaraz.management.model.dto.TicketListProjectDTO;
+import com.sarfaraz.management.model.selects.TicketPriority;
+import com.sarfaraz.management.model.selects.TicketStatus;
+import com.sarfaraz.management.model.selects.TicketType;
 import com.sarfaraz.management.repository.TicketRepo;
-import com.sarfaraz.management.repository.TicketRepo.Types;
-import com.sarfaraz.management.repository.TicketRepo.Priority;
-import com.sarfaraz.management.repository.TicketRepo.Status;
 
 @Service
 public class TicketService {
@@ -39,42 +35,31 @@ public class TicketService {
 	}
 
 	@Transactional
-	public Long save(Ticket ticket) {
+	public boolean save(Ticket ticket) {
+		if (ticket.getProject().getId() == null)
+			return false;
+		if (ticket.getSubmitter() == null)
+			return false;
 		ticket.setUpdated(LocalDate.now());
 		if (ticket.getId() == null) {
 			ticket.setCreated(LocalDate.now());
 		}
-		if (ticket.getProject().getId() == null)
-			return -1L;
-		if (ticket.getSubmitter() == null)
-			return -1L;
-		if (ticket.getType() != null) {
-			for (Types ty : Types.values()) {
-				if (ty.name().equalsIgnoreCase(ticket.getType()))
-					ticket.setType(ty.name());
-			}
-		} else
-			ticket.setType(Types.ISSUE.name());
+		if (ticket.getType() == null) {
+			ticket.setType(TicketType.ISSUE);
+		}
 
-		if (ticket.getStatus() != null) {
-			for (Status ty : Status.values()) {
-				if (ty.name().equalsIgnoreCase(ticket.getStatus()))
-					ticket.setStatus(ty.name());
-			}
-		} else
-			ticket.setStatus(Status.HOLD.name());
-		if (ticket.getPriority() != null) {
-			for (Priority ty : Priority.values()) {
-				if (ty.name().equalsIgnoreCase(ticket.getPriority()))
-					ticket.setPriority(ty.name());
-			}
-		} else
-			ticket.setPriority(Priority.MEDIUM.name());
+		if (ticket.getStatus() == null) {
+			ticket.setStatus(TicketStatus.HOLD);
+		}
+
+		if (ticket.getPriority() == null) {
+			ticket.setPriority(TicketPriority.MEDIUM);
+		}
 
 		log.warn(ticket.toString());
 		Ticket t = repo.save(ticket);
 
-		return t.getId();
+		return t.getId() > 0;
 	}
 
 	@Transactional

@@ -44,7 +44,7 @@ public class UserController {
 			final @RequestParam(value = "sort", required = false, defaultValue = "name") String sort)
 			throws JSONException {
 		Page<UserOnlyDTO> users = userService.sortedByfield(page, size, sort);
-		
+
 		ResponsePageable response = new ResponsePageable(users.getTotalPages(), users.getTotalElements(),
 				users.getSize(), users.getNumber() + 1, users.toList());
 		return new ResponseEntity<>(response, HttpStatus.OK);
@@ -82,10 +82,10 @@ public class UserController {
 	}
 
 	@RequestMapping(value = { "/save" }, method = RequestMethod.POST, consumes = "application/json")
-	public ResponseEntity<Map<String, Long>> save(@RequestBody User user) {
-		// log.error(user.toString());
-		long id = userService.save(user);
-		Map<String, Long> res = Map.of("id", id);
+	public ResponseEntity<Map<String, Boolean>> save(@RequestBody User user) {
+		log.error(user.toString());
+		boolean saved = userService.save(user);
+		Map<String, Boolean> res = Map.of("saved", saved);
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
@@ -113,7 +113,6 @@ public class UserController {
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
-
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public ResponseEntity<Map<String, Boolean>> deleteUser(@RequestParam("uid") Long uid) {
 		try {
@@ -129,7 +128,7 @@ public class UserController {
 	public boolean updateRoles(@RequestBody User user) throws Exception {
 		boolean result = userService.updateRole(user.getId(), user.getRoles());
 		log.info(user.toString());
-		log.info("result : {}",result);
+		log.info("result : {}", result);
 		return result;
 	}
 

@@ -59,47 +59,4 @@ public interface TicketRepo extends JpaRepository<Ticket, Long> {
 			+ "t.assignedUser as assignedUser from Ticket t where t.project.id=:id")
 	List<TicketListDTO> getRelatedTickets(@Param("id") Long id);
 
-	enum Types {
-		ISSUE("Bug/Issue"), FEATURE("Feature Request"), PERFORMANCE("Performance Issue");
-
-		private String detail;
-
-		Types(String string) {
-			detail = string;
-		}
-
-		public String getDetail() {
-			return detail;
-		}
-	}
-
-	enum Status {
-		HOLD("On Hold"), ACTIVE("Currently Working"), COMPLETED("Request Completed"),
-		REJECTED("Not Accepted This Request");
-
-		private String detail;
-
-		Status(String string) {
-			detail = string;
-		}
-
-		public String getDetail() {
-			return detail;
-		}
-	}
-
-	enum Priority {
-		LOW("Low Interest On This"), MEDIUM("Good Interest On This"), HIGH("High Interest On This");
-
-		private String displayName;
-
-		Priority(String string) {
-			displayName = string;
-		}
-
-		public String getName() {
-			return displayName;
-		}
-	}
-
 }

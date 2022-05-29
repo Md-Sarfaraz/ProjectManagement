@@ -3,8 +3,12 @@ package com.sarfaraz.management.security;
 import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Stream;
+
+import javax.management.RuntimeErrorException;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -15,6 +19,7 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.sarfaraz.management.model.User;
+import com.sarfaraz.management.model.selects.UserRoles;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,7 +80,7 @@ public class JwtUtility {
 	public String generateAccessToken(User user, String issuer) {
 		String token = JWT.create().withSubject(user.getUsername())
 				.withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
-				.withIssuer(issuer).withClaim("roles", new ArrayList<>(user.getRoles()))
+				.withIssuer(issuer).withClaim("roles", user.getRoles().stream().map(r -> r.name()).toList())
 				.withClaim("email", user.getEmail()).withClaim("name", user.getName()).withClaim("id", user.getId())
 				.sign(getAlgorithm());
 		log.info("Access Token Generated : {}", token);

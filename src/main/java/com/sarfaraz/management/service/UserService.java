@@ -22,6 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sarfaraz.management.exception.DatabaseUpdateException;
@@ -34,17 +35,17 @@ import com.sarfaraz.management.model.selects.UserRoles;
 import com.sarfaraz.management.repository.UserRepo;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class UserService implements UserDetailsService {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
-
 	private final UserRepo userRepo;
 
-	// private final PasswordEncoder encoder;
+	private final PasswordEncoder encoder;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -56,7 +57,7 @@ public class UserService implements UserDetailsService {
 		Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
 		user.getRoles().forEach(role -> {
 			// authorities.add(new SimpleGrantedAuthority(role.getName()));
-			authorities.add(new SimpleGrantedAuthority(role));
+			authorities.add(new SimpleGrantedAuthority(role.toString()));
 		});
 		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
 				authorities);
@@ -66,16 +67,16 @@ public class UserService implements UserDetailsService {
 		return userRepo.findAll();
 	}
 
-	public long save(User user) {
-		// user.setPassword(encoder.encode(user.getPassword()));
+	public boolean save(User user) {
+		user.setPassword(encoder.encode(user.getPassword()));
 		if (user.getRoles().isEmpty()) {
-			user.addRole(ROLE_PUBLIC.name());
+			user.addRole(ROLE_PUBLIC);
 		}
-		if (!user.getRoles().contains(ROLE_PUBLIC.toString())) {
-			user.addRole(ROLE_PUBLIC.name());
+		if (!user.getRoles().contains(ROLE_PUBLIC)) {
+			user.addRole(ROLE_PUBLIC);
 		}
 		User u = userRepo.save(user);
-		return u.getId();
+		return u.getId() == user.getId();
 	}
 
 	public long updateUser(User user) {
@@ -102,11 +103,12 @@ public class UserService implements UserDetailsService {
 			Optional<User> opt = userRepo.findById(id);
 			opt.orElseThrow(() -> new DatabaseUpdateException("Can't find any Member with ID : " + id));
 			User user = opt.get();
-			/*
-			 * if (encoder.matches(oldPass, user.getPassword())) { result =
-			 * userRepo.updateUserPasswod(encoder.encode(newPass), user.getId());
-			 * log.info("User New Password : " + newPass); }
-			 */
+
+			if (encoder.matches(oldPass, user.getPassword())) {
+				result = userRepo.updateUserPasswod(encoder.encode(newPass), user.getId());
+				log.info("User New Password : " + newPass);
+			}
+
 			if (oldPass.equals(user.getPassword())) {
 				result = userRepo.updateUserPasswod(newPass, user.getId());
 				log.info("User New Password : " + newPass); // for testing and should be removed
@@ -137,33 +139,26 @@ public class UserService implements UserDetailsService {
 		return userRepo.findByEmail(email);
 	}
 
-	@Modifying
-	public boolean updateRole(long id, Set<String> roles) throws UserInputException {
-		Set<String> ur = new HashSet<>();
-		try {
-			roles.forEach(r -> ur.add(UserRoles.valueOf(r).name()));
-		} catch (IllegalArgumentException e) {
-			throw new UserInputException("Wrong Role(s) Name");
-		}
+	@Transactional
+	public boolean updateRole(long id, Set<UserRoles> roles) throws UserInputException {
+
 		Optional<User> opt = userRepo.findById(id);
-		if (opt.isEmpty()) {
+		if (opt.isEmpty())
 			return false;
-		} else {
-			User user = opt.get();
-			user.getRoles().addAll(ur);
-			userRepo.save(user);
-			log.info("User Role Updated : {}", user.getRoles());
-			return true;
-		}
+
+		User user = opt.get();
+		user.getRoles().addAll(roles);
+		userRepo.save(user);
+		log.info("User Role Updated : {}", user.getRoles());
+
+		return true;
 	}
 
-	public boolean addRole(long id, String role) {
+	public boolean addRole(long id, UserRoles role) {
 		Optional<User> opt = userRepo.findById(id);
 		if (opt.isEmpty())
 			return false;
 		opt.ifPresent(user -> {
-			String r = UserRoles.valueOf(role).name();
-
 			user.addRole(role);
 			log.info(user.toString());
 			// userRepo.save(user);

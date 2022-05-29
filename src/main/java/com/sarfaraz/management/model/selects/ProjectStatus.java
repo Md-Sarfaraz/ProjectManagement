@@ -1,8 +1,7 @@
 package com.sarfaraz.management.model.selects;
 
 public enum ProjectStatus {
-	ACTIVE("Active"), CLOSED("Closed"), DEVELOPMENT("Under Development"), COMPLETED("Completed"), HOLD("On Hold"),
-	CANCELLED("Cancelled"),;
+	ACTIVE("Active"), DEVELOPMENT("Under Development"), COMPLETED("Completed"), HOLD("On Hold"),;
 
 	private final String name;
 

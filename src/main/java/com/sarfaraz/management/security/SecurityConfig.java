@@ -15,8 +15,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import lombok.RequiredArgsConstructor;
 
@@ -56,7 +54,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		http.authorizeRequests().antMatchers(HttpMethod.POST, JwtProperties.LOGIN_URL).permitAll();
 		http.authorizeRequests().antMatchers(HttpMethod.GET, JwtProperties.REFRESH_TOKEN_URL).permitAll();
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/index", "/home", "/api/select-properties").permitAll();
+		http.authorizeRequests().antMatchers(HttpMethod.GET, "/index", "/home", "/api/info", "/api/select-properties")
+				.permitAll();
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/roles/**").hasAnyAuthority("ROLE_ADMIN");
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/ticket/**").hasAnyAuthority("ROLE_ADMIN",

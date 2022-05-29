@@ -1,6 +1,13 @@
 package com.sarfaraz.management.model.dto;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
 import org.springframework.beans.factory.annotation.Value;
+
+import com.sarfaraz.management.model.selects.TicketPriority;
+import com.sarfaraz.management.model.selects.TicketStatus;
+import com.sarfaraz.management.model.selects.TicketType;
 
 public interface TicketListDTO {
 	Long getId();
@@ -9,26 +16,23 @@ public interface TicketListDTO {
 
 	String getDetail();
 
-	// @JsonFormat(pattern = "yyyy-MM-dd")
-	// @Convert(converter = LocalDateAttributeConverter.class)
 	@Value("#{target.created.toString()}")
 	String getCreated();
 
-	// @JsonFormat(pattern = "yyyy-MM-dd")
-	// @Convert(converter = LocalDateAttributeConverter.class)
 	@Value("#{target.updated.toString()}")
 	String getUpdated();
 
-	// @JsonFormat(pattern = "yyyy-MM-dd")
-	// @Convert(converter = LocalDateAttributeConverter.class)
 	@Value("#{target.lastDate.toString()}")
 	String getLastDate();
 
-	String getStatus();
+	@Enumerated(EnumType.STRING)
+	TicketStatus getStatus();
 
-	String getPriority();
+	@Enumerated(EnumType.STRING)
+	TicketPriority getPriority();
 
-	String getType();
+	@Enumerated(EnumType.STRING)
+	TicketType getType();
 
 	ProjectDTO getProject();
 

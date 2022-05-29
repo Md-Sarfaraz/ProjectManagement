@@ -68,10 +68,10 @@ public class TicketController {
 
 	@RequestMapping(path = { "/save",
 			"/update" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Map<String, Long>> saveTicket(@RequestBody Ticket ticket) {
+	public ResponseEntity<Map<String, Boolean>> saveTicket(@RequestBody Ticket ticket) {
 		log.info(ticket.toString());
-		long savedId = service.save(ticket);
-		Map<String, Long> res = Map.of("id", savedId);
+		boolean savedId = service.save(ticket);
+		Map<String, Boolean> res = Map.of("id", savedId);
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
