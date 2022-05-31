@@ -81,11 +81,11 @@ public class UserController {
 		// return users;
 	}
 
-	@RequestMapping(value = { "/save" }, method = RequestMethod.POST, consumes = "application/json")
+	@RequestMapping(value = { "/save","/signup" }, method = RequestMethod.POST, consumes = "application/json")
 	public ResponseEntity<Map<String, Boolean>> save(@RequestBody User user) {
 		log.error(user.toString());
-		boolean saved = userService.save(user);
-		Map<String, Boolean> res = Map.of("saved", saved);
+//		boolean saved = userService.save(user);
+		Map<String, Boolean> res = Map.of("saved", false);
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 

@@ -56,6 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers(HttpMethod.GET, JwtProperties.REFRESH_TOKEN_URL).permitAll();
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/index", "/home", "/api/info", "/api/select-properties")
 				.permitAll();
+		http.authorizeRequests().antMatchers(HttpMethod.POST, "/api/user/save").permitAll();
+
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/roles/**").hasAnyAuthority("ROLE_ADMIN");
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/ticket/**").hasAnyAuthority("ROLE_ADMIN",
